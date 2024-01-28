@@ -1,0 +1,20 @@
+version: '3.9'
+networks:
+  br0:
+    external: true
+    
+services:
+  drawio:
+    image: jgraph/drawio:latest
+    container_name: drawio
+    restart: always
+    volumes:
+      - ${GITEA_DATA_DIR}:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    networks:
+      br0:
+        ipv4_address: ${DRAWIO_IP}

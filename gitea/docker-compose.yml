@@ -1,0 +1,28 @@
+version: '3.9'
+networks:
+  br0:
+    external: true
+    
+services:
+  gitea:
+    image: gitea/gitea:1.21.4
+    container_name: gitea
+    environment:
+      - DB_TYPE=${GITEA_DB_TYPE}
+      - DB_HOST=${GITEA_DB_HOST}
+      - DB_NAME=${GITEA_DB_NAME}
+      - DB_USER=${GITEA_DB_USER}
+      - DB_PASSWD=${GITEA_DB_PASSWD}
+      - INSTALL_LOCK=true
+      - DISABLE_REGISTRATION=true
+    restart: always
+    volumes:
+      - ${GITEA_DATA_DIR}:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3002:3000"
+      - "222:22"
+    networks:
+      br0:
+        ipv4_address: ${GITEA_IP}

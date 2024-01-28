@@ -1,0 +1,29 @@
+version: '3.9'
+networks:
+  br0:
+    external: true
+    
+services:
+  drawio:
+    image: gristlabs/grist:latest
+    container_name: grist
+    restart: always
+    environment:
+      - GRIST_DEFAULT_EMAIL=${GRIST_DEFAULT_EMAIL}
+    volumes:
+      - ${GRIST_DATA_DIR}:/persist
+    ports:
+      - ${GRIST_PORT}:${GRIST_PORT}
+    networks:
+      br0:
+        ipv4_address: ${GRIST_IP}
+
+
+##TYPEORM_DATABASE	database filename for sqlite or database name for other db types
+#TYPEORM_HOST	host for db
+#TYPEORM_LOGGING	set to 'true' to see all sql queries
+#TYPEORM_PASSWORD	password to use
+#TYPEORM_PORT	port number for db if not the default for that db type
+#TYPEORM_TYPE	set to 'sqlite' or 'postgres'
+#TYPEORM_USERNAME	username to connect as
+#TYPEORM_EXTRA	any other properties to pass to TypeORM in JSON format

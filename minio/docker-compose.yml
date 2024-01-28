@@ -1,0 +1,21 @@
+version: '3.9'
+networks:
+  br0:
+    external: true
+    
+services:
+  minio:
+    image: quay.io/minio/minio:RELEASE.2024-01-01T16-36-33Z
+    container_name: minio
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - ${MINIO_DATA_DIR}:/data
+    command: server --console-address :9001 /data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    networks:
+      br0:
+        ipv4_address: ${MINIO_IP}
