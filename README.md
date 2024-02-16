@@ -50,7 +50,7 @@ outline, https://www.getoutline.com/
 
 ### 克隆部署仓库
 
-`git clone https://gitee.com/lpz9/vps-deploy.git
+`git clone git@github.com:bestbugwriter/outline-deploy.git
 `
 
 ### 部署所有服务
