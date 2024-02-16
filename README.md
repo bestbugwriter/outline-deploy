@@ -50,7 +50,7 @@ outline, https://www.getoutline.com/
 
 ### 克隆部署仓库
 
-`git clone [git@github.com:bestbugwriter/outline-deploy.git](https://github.com/bestbugwriter/outline-deploy.git)
+`git clone https://github.com/bestbugwriter/outline-deploy.git
 `
 
 ### 部署所有服务
