@@ -76,3 +76,7 @@ outline, https://www.getoutline.com/
 
 `./deploy restart 组件
 `
+
+#### 升级outline
+修改 outline的 docker-compose.yml中的镜像tag，然后 source config.sh，进入到 outline目录  执行 
+docker compose up --force-recreate outline -d
