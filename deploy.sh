@@ -140,6 +140,7 @@ function deployService() {
     dockerComposeUp outline
 
     # 这里等一下 nginxproxymanager service 不一定启动完成，20241031-这个时间还是不够，会导致后面的改密码 改名字 add host都失败，需要增加一个单独的补救命令
+    # npm登录502，可能是因为启动下载IP-ranges.json超时，导致启动卡住，pr还没合，可以通过修改容器中的 /app/index.js 
     sleep 60
     # nginxproxymanager需要首次登录时修改 账号和密码
     echo "nginxproxymanager change account"
