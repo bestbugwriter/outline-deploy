@@ -13,7 +13,7 @@ services:
       DB_MYSQL_PORT: ${NPM_DB_PORT}
       DB_MYSQL_USER: ${NPM_DB_USER}
       DB_MYSQL_PASSWORD: ${NPM_DB_PASSWORD}
-      DB_MYSQL_NAME:  ${NPM_DB_NAME}
+      DB_MYSQL_NAME: ${NPM_DB_NAME}
     ports:
       - '80:80'
       - '81:81'
