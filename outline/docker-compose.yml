@@ -6,7 +6,7 @@ networks:
 services:
   outline:
     container_name: outline
-    image: docker.getoutline.com/outlinewiki/outline:latest
+    image: outlinewiki/outline:latest
     env_file: ${OUTLINE_ENV_FILE}
     ports:
       - "3001:3000"
