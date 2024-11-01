@@ -5,7 +5,7 @@ networks:
 # 默认密码：admin@example.com         changeme
 services:
   nginxproxymanager:
-    image: 'jc21/nginx-proxy-manager:latest'
+    image: 'jc21/nginx-proxy-manager:2.11.1'
     container_name: nginxproxymanager
     restart: always
     environment:
