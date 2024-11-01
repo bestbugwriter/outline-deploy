@@ -16,10 +16,10 @@ function randomString16() {
 export DOCKER_SUBNET=172.16.0.0/24
 
 # 个人域名，需要用的几个域名都要做对应的 dns解析，要能解析到我们服务器的IP
-export ROOT_DOMAIN_NAME=abc.fun
+export ROOT_DOMAIN_NAME=bdms.fun
 
 # 个人邮箱
-export ADMIN_EMAIL=abc@live.com
+export ADMIN_EMAIL=yywfqq@live.com
 
 
 ################
