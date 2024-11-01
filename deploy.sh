@@ -57,7 +57,7 @@ function deployBase() {
     dockerComposeUp redis
 
     # 等他们启动
-    sleep 30
+    sleep 20
 
     # minio 开关
     if [ "$MINIO_ENABLED" = "true" ]; then
@@ -93,9 +93,12 @@ function deployBase() {
     createDbNPM
     dockerComposeUp nginxproxymanager
 
+    sleep 10
     # 创建 gitea的 管理员账号
     echo "create gitea admin user: ${GITEA_ADMIN_USER}."
     createGiteaAdmin "${GITEA_ADMIN_USER}" "${GITEA_ADMIN_PASSWORD}" "${GITEA_ADMIN_EMAIL}"
+
+    sleep 5
 
     # 创建 gitea的 应用，给 outline做oidc认证服务
     echo "create gitea app: ${GITEA_APP_NAME}."
