@@ -56,6 +56,9 @@ function deployBase() {
     dockerComposeUp postgresql
     dockerComposeUp redis
 
+    # 等他们启动
+    sleep 30
+
     # minio 开关
     if [ "$MINIO_ENABLED" = "true" ]; then
         echo "minio enabled, create minio container."
@@ -84,6 +87,7 @@ function deployBase() {
     echo "create gitea service."
     dockerComposeUp gitea
 
+    sleep 10
     # 创建 nginx proxy manager 的 MySQL数据库， 创建 nginx proxy manager的服务，依赖MySQL
     echo "create nginx proxy manager database and service."
     createDbNPM
