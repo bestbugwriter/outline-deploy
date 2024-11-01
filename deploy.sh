@@ -126,6 +126,8 @@ function printConf() {
 # 部署方法，部署基本组件 + outline服务
 # 创建 nginxproxymanager 配置
 function deployService() {
+    env > deploy.env
+
     # 部署基础服务
     echo "deploy base"
     deployBase
