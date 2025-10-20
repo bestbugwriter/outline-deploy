@@ -4,7 +4,7 @@ networks:
 
 services:
   keycloak:
-    image: keycloak/keycloak:24.0
+    image: keycloak/keycloak:26.4.1
     container_name: keycloak
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
