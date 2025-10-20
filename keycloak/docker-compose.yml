@@ -4,10 +4,8 @@ networks:
 
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:24.0
+    image: keycloak/keycloak:24.0
     container_name: keycloak
-    depends_on:
-      - postgresql
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
