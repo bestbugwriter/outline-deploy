@@ -4,7 +4,7 @@ networks:
     
 services:
   gitea:
-    image: gitea/gitea:1.21.4
+    image: gitea/gitea:1.24.6
     container_name: gitea
     environment:
       - DB_TYPE=${GITEA_DB_TYPE}

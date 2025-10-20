@@ -59,7 +59,7 @@ export REDIS_LOG_DIR=./logs
 
 ################
 ## minio 配置，这个可以用 阿里云oss、腾讯云cos等 s3兼容的对象存储替代
-export MINIO_ENABLED=true
+export MINIO_ENABLED=false
 export MINIO_IP=172.16.0.30
 export MINIO_PORT=9001
 export MINIO_S3_PORT=9000
@@ -117,7 +117,7 @@ export GITEA_DB_HOST=${MYSQL_IP}:3306
 export GITEA_DB_NAME=${MYSQL_GITEA_DB}
 export GITEA_DB_USER=${MYSQL_USER}
 export GITEA_DB_PASSWD=${MYSQL_PASSWORD}
-export GITEA_DOMAIN_NAME=gitea.${ROOT_DOMAIN_NAME}
+export GITEA_DOMAIN_NAME=git.${ROOT_DOMAIN_NAME}
 
 # gitea中 创建的 app名称
 export GITEA_APP_NAME=outline
@@ -143,7 +143,7 @@ export OUTLINE_ENV_FILE=outline.env
 export OUTLINE_SECRET_KEY=$(openssl rand -hex 32)
 export OUTLINE_UTILS_SECRET=$(openssl rand -hex 32)
 # outline的域名
-export OUTLINE_DOMAIN_NAME=outline.${ROOT_DOMAIN_NAME}
+export OUTLINE_DOMAIN_NAME=doc.${ROOT_DOMAIN_NAME}
 
 # outline 的 url， 我们用https的
 export OUTLINE_ROOT_URL=https://${OUTLINE_DOMAIN_NAME}

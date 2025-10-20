@@ -4,7 +4,7 @@ networks:
     
 services:
   redis:
-    image: redis:7.2.4
+    image: redis:8.2.2
     container_name: redis
     volumes:
       - ${REDIS_DATA_DIR}:/data
