@@ -1,0 +1,32 @@
+
+{
+  "realm": "${KEYCLOAK_REALM}",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "${KEYCLOAK_CLIENT_ID}",
+      "secret": "${KEYCLOAK_CLIENT_SECRET}",
+      "clientAuthenticatorType": "client-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "https://${OUTLINE_DOMAIN_NAME}/auth/oidc.callback"
+      ],
+      "attributes": {}
+    }
+  ],
+  "users": [
+    {
+      "username": "${ADMIN_EMAIL}",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${KEYCLOAK_ADMIN_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

@@ -22,21 +22,6 @@ export ROOT_DOMAIN_NAME=bdms.fun
 export ADMIN_EMAIL=yywfqq@live.com
 
 
-################
-# mysql 配置
-export MYSQL_IP=172.16.0.10
-# mysql root密码
-export MYSQL_ROOT_PASSWORD=$(randomString16)
-export MYSQL_DATA_DIR=./data
-
-# 使用到的两个 db，一个给 gitea用，一个给 nginx proxy manager用
-export MYSQL_GITEA_DB=gitea
-export MYSQL_NPM_DB=npm
-
-# 默认的 MySQL账号， 密码随机
-export MYSQL_USER=base
-export MYSQL_PASSWORD=$(randomString16)
-
 
 ################
 # postgresql 配置
@@ -84,48 +69,36 @@ export OUTLINE_MINIO_BUCKET=outline
 
 
 ################
-## nginx proxy manager 相关的配置
-export NPM_IP=172.16.0.40
-export NPM_DATA_DIR=./data
-export NPM_LETSENCRYPT_DIR=./letsencrypt
-
-# nginx proxy manager 使用 mysql 作为存储
-export NPM_DB_HOST=${MYSQL_IP}
-export NPM_DB_PORT=3306
-export NPM_DB_USER=${MYSQL_USER}
-export NPM_DB_PASSWORD=${MYSQL_PASSWORD}
-export NPM_DB_NAME=${MYSQL_NPM_DB}
-
-# nginx proxy manager 默认的 用户名密码， 需要在首次登录后修改
-export NPM_ADMIN_USER_DEFAULT=admin@example.com
-export NPM_ADMIN_PASSWORD_DEFAULT=changeme
-
-# nginx proxy manager 首次登录后，用户名改成自己的邮箱，密码随机 16位字符
-export NPM_ADMIN_USER=${ADMIN_EMAIL}
-export NPM_ADMIN_PASSWORD=$(randomString16)
+## https-portal a fully automated SSL/TLS reverse proxy
+export HTTPS_PORTAL_IP=172.16.0.40
+export HTTPS_PORTAL_DATA_DIR=./data
 
 
 ################
-## gitea相关的配置，主要用于做一个 oidc的认证服务
-export GITEA_IP=172.16.0.50
-export GITEA_PORT=3000
-export GITEA_DATA_DIR=./data
+## Keycloak IAM
+export KEYCLOAK_IP=172.16.0.50
+export KEYCLOAK_DOMAIN_NAME=auth.${ROOT_DOMAIN_NAME}
 
-# gitea的 db配置，默认用的 mysql
-export GITEA_DB_TYPE=mysql
-export GITEA_DB_HOST=${MYSQL_IP}:3306
-export GITEA_DB_NAME=${MYSQL_GITEA_DB}
-export GITEA_DB_USER=${MYSQL_USER}
-export GITEA_DB_PASSWD=${MYSQL_PASSWORD}
-export GITEA_DOMAIN_NAME=git.${ROOT_DOMAIN_NAME}
+# Keycloak Admin credentials
+export KEYCLOAK_ADMIN=admin
+export KEYCLOAK_ADMIN_PASSWORD=$(randomString16)
 
-# gitea中 创建的 app名称
-export GITEA_APP_NAME=outline
+# Keycloak's connection to PostgreSQL.
+# It uses the main postgres user to connect and will manage its own database.
+export KEYCLOAK_DB_NAME=keycloak
 
-# 注册时不能用 admin作为管理员账号，这是保留值
-export GITEA_ADMIN_USER=root
-export GITEA_ADMIN_PASSWORD=$(randomString16)
-export GITEA_ADMIN_EMAIL=${ADMIN_EMAIL}
+# Environment variables that the Keycloak container will use
+export KC_DB=postgres
+export KC_DB_URL_HOST=${POSTGRES_IP}
+export KC_DB_URL_DATABASE=${KEYCLOAK_DB_NAME}
+export KC_DB_USERNAME=${POSTGRES_USER}
+export KC_DB_PASSWORD=${POSTGRES_PASSWORD}
+export KC_HOSTNAME=${KEYCLOAK_DOMAIN_NAME}
+
+# Details for the realm and OIDC client for Outline
+export KEYCLOAK_REALM=outline
+export KEYCLOAK_CLIENT_ID=outline
+export KEYCLOAK_CLIENT_SECRET=$(randomString 32)
 
 
 ################
