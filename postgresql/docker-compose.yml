@@ -17,6 +17,9 @@ services:
       - KRATOS_DB_USER=${KRATOS_DB_USER}
       - KRATOS_DB_PASSWORD=${KRATOS_DB_PASSWORD}
       - KRATOS_DB_NAME=${KRATOS_DB_NAME}
+      - HYDRA_DB_USER=${HYDRA_DB_USER}
+      - HYDRA_DB_PASSWORD=${HYDRA_DB_PASSWORD}
+      - HYDRA_DB_NAME=${HYDRA_DB_NAME}
     volumes:
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
       - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data

@@ -42,7 +42,7 @@ function createHydraClientForOutline() {
     # 等待 Hydra 启动
     sleep 10
     docker run --rm --network br0 \
-        oryd/hydra:v2.2.0 clients create \
+        oryd/hydra:v2.2.0 oauth2 client create \
         --endpoint "http://${HYDRA_IP}:4445" \
         --id "${HYDRA_CLIENT_ID}" \
         --secret "${HYDRA_CLIENT_SECRET}" \
