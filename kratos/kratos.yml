@@ -2,11 +2,11 @@ version: v0.11.1
 
 serve:
   public:
-    base_url: https://${KRATOS_DOMAIN_NAME}/
+    base_url: "https://${KRATOS_DOMAIN_NAME}/"
     cors:
       enabled: true
   admin:
-    base_url: http://${KRATOS_IP}:4434/
+    base_url: "http://${KRATOS_IP}:4434/"
 
 dsn: postgres://${KRATOS_DB_USER}:${KRATOS_DB_PASSWORD}@${POSTGRES_IP}:5432/${KRATOS_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
 
@@ -31,8 +31,7 @@ identity:
 
 selfservice:
   default_browser_return_url: https://${OUTLINE_DOMAIN_NAME}/
-  whitelisted_return_urls:
-    - https://${OUTLINE_DOMAIN_NAME}/
+
 
   methods:
     password:
@@ -68,4 +67,4 @@ selfservice:
       after:
         password:
           hooks:
-            - session
+            - hook: session
