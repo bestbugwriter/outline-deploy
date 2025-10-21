@@ -69,7 +69,18 @@ function deployBase() {
     dockerComposeUp postgresql
     dockerComposeUp redis
     dockerComposeUp kratos
+    echo "Running Kratos database migrations..."
+    docker run --rm --network br0 \
+        oryd/kratos:v1.1.0 migrate sql \
+        -e --yes \
+        "postgres://${KRATOS_DB_USER}:${KRATOS_DB_PASSWORD}@${POSTGRES_IP}:5432/${KRATOS_DB_NAME}?sslmode=disable"
+
     dockerComposeUp hydra
+    echo "Running Hydra database migrations..."
+    docker run --rm --network br0 \
+        oryd/hydra:v2.2.0 migrate sql \
+        -e --yes \
+        "postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASSWORD}@${POSTGRES_IP}:5432/${HYDRA_DB_NAME}?sslmode=disable"
 
     # 等他们启动
     sleep 20

@@ -20,6 +20,10 @@ log:
   level: info
   format: text
 
+courier:
+  smtp:
+    connection_uri: smtp://user:pass@localhost:1025/?skip_ssl_verify=true # Placeholder, configure if email verification/recovery is enabled
+
 identity:
   default_schema_id: default
   schemas:
@@ -65,4 +69,4 @@ selfservice:
       after:
         password:
           hooks:
-            - hook: session
+            - session
