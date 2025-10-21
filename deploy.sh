@@ -40,21 +40,6 @@ function dockerComposeRestart() {
 }
 
 # 检查并安装 jq
-function install_jq_if_missing() {
-    if ! command -v jq &> /dev/null
-    then
-        echo "jq is not installed. Attempting to install jq..."
-        sudo apt-get update && sudo apt-get install -y jq
-        if ! command -v jq &> /dev/null
-        then
-            echo "Failed to install jq. Please install jq manually and try again."
-            exit 1
-        fi
-        echo "jq installed successfully."
-    else
-        echo "jq is already installed."
-    fi
-}
 
 # 等待服务启动
 function wait_for_service() {
@@ -186,7 +171,6 @@ function deployService() {
 
 # 主方法
 function main() {
-    install_jq_if_missing
     # 如果没有传入参数，或者传入的第一个参数是"help"，则显示帮助信息
     if [ -z "$1" ] || [ "$1" == "help" ]; then
         echo "用法： $0 [方法1|方法2] [参数...]"

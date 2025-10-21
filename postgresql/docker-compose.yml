@@ -8,7 +8,9 @@ services:
     container_name: postgres
 
     environment:
-      - POSTGRES_DB=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
       - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data
