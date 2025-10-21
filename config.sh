@@ -129,10 +129,6 @@ export GRIST_DOMAIN_NAME=drist.${ROOT_DOMAIN_NAME}
 export GRIST_DEFAULT_EMAIL=${ADMIN_EMAIL}
 
 
-################
-## MailHog 配置
-export MAILHOG_IP=172.16.0.90
-
 
 ################
 ## Ory Kratos (Identity Management)
