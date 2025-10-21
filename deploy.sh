@@ -71,7 +71,7 @@ function createHydraClientForOutline() {
         --scope profile \
         --scope email \
         --scope offline_access \
-        --callbacks "${OUTLINE_ROOT_URL}/auth/oidc.callback" \
+        --redirect-uri "${OUTLINE_ROOT_URL}/auth/oidc.callback" \
         --format json)
 
     # Check if CLIENT_OUTPUT is empty or contains an error
