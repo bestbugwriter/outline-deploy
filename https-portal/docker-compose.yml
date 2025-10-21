@@ -11,7 +11,7 @@ services:
       - '80:80'
       - '443:443'
     environment:
-      DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT}'
+      DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT}, ${GITEA_DOMAIN_NAME} -> http://${GITEA_IP}:${GITEA_PORT}'
       STAGE: 'staging' # Or 'staging' for testing
       # FORCE_RENEW: 'true' # Uncomment to force renew certificates
     volumes:
