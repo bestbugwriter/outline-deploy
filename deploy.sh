@@ -107,6 +107,7 @@ function deployBase() {
     echo "create base component."
     dockerComposeUp postgresql
     dockerComposeUp redis
+    dockerComposeUp mailhog
     dockerComposeUp kratos
     echo "Running Kratos database migrations..."
     docker run --rm --network br0 \

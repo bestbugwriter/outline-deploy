@@ -21,8 +21,8 @@ log:
   format: text
 
 courier:
-  stub:
-    enabled: true
+  smtp:
+    connection_uri: smtp://${MAILHOG_IP}:1025/?skip_ssl_verify=true # Point to MailHog service via IP
 
 identity:
   default_schema_id: default

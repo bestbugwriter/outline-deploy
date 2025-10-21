@@ -130,6 +130,11 @@ export GRIST_DEFAULT_EMAIL=${ADMIN_EMAIL}
 
 
 ################
+## MailHog 配置
+export MAILHOG_IP=172.16.0.90
+
+
+################
 ## Ory Kratos (Identity Management)
 export KRATOS_IP=172.16.0.51
 export KRATOS_DOMAIN_NAME=login.${ROOT_DOMAIN_NAME}

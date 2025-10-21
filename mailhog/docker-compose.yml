@@ -1,0 +1,20 @@
+networks:
+  br0:
+    external: true
+
+services:
+  mailhog:
+    image: mailhog/mailhog:1.0.1
+    container_name: mailhog
+    restart: always
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '5'
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
+    networks:
+      br0:
+        ipv4_address: ${MAILHOG_IP} # Assign a static IP within your DOCKER_SUBNET
