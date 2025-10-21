@@ -26,11 +26,20 @@ export ADMIN_EMAIL=yywfqq@live.com
 ################
 # postgresql 配置
 export POSTGRES_IP=172.16.0.11
-export POSTGRES_DB=outline
 export POSTGRES_DATA_DIR=./data
-# 密码随机
-export POSTGRES_USER=outline
+# postgres 超级管理员账号
+export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=$(randomString16)
+
+# outline 数据库账号
+export OUTLINE_DB_USER=outline
+export OUTLINE_DB_PASSWORD=$(randomString16)
+export OUTLINE_DB_NAME=outline
+
+# keycloak 数据库账号
+export KEYCLOAK_DB_USER=keycloak
+export KEYCLOAK_DB_PASSWORD=$(randomString16)
+export KEYCLOAK_DB_NAME=keycloak
 
 
 ################
@@ -91,8 +100,8 @@ export KEYCLOAK_DB_NAME=keycloak
 export KC_DB=postgres
 export KC_DB_URL_HOST=${POSTGRES_IP}
 export KC_DB_URL_DATABASE=${KEYCLOAK_DB_NAME}
-export KC_DB_USERNAME=${POSTGRES_USER}
-export KC_DB_PASSWORD=${POSTGRES_PASSWORD}
+export KC_DB_USERNAME=${KEYCLOAK_DB_USER}
+export KC_DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
 export KC_HOSTNAME=${KEYCLOAK_DOMAIN_NAME}
 
 # Details for the realm and OIDC client for Outline

@@ -98,20 +98,16 @@ function deployService() {
     echo "deploy keycloak"
     dockerComposeUp keycloak
     
-    # 等 keycloak 启动完成
-    sleep 60
-
-    # 部署 https-portal
-    echo "deploy https-portal"
-    dockerComposeUp https-portal
-
-    # 生成 outline 环境配置文件, 在 outline目录下
-    echo "Generate outline config file..."
-    envsubst < "outline/outline.env.template" > "outline/outline.env"
-
     # 部署 outline服务
     echo "deploy outline"
     dockerComposeUp outline
+
+    # 等待 outline 和 keycloak 启动完成
+    sleep 30
+
+    # 最后部署 https-portal，因为它依赖前面的服务
+    echo "deploy https-portal"
+    dockerComposeUp https-portal
 
     # 判断是否创建 minio bucket
     if [ "$MINIO_ENABLED" = "true" ]; then
