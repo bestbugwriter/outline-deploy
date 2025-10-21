@@ -27,7 +27,6 @@ export ADMIN_EMAIL=yywfqq@live.com
 # postgresql 配置
 export POSTGRES_IP=172.16.0.11
 export POSTGRES_DATA_DIR=./data
-export POSTGRES_DB=postgres
 # postgres 超级管理员账号
 export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=$(randomString16)
@@ -47,9 +46,9 @@ export GITEA_DATA_DIR=./data
 # gitea的 db配置，默认用的 mysql
 export GITEA_DB_TYPE=postgres
 export GITEA_DB_HOST=${POSTGRES_IP}:5432
-export GITEA_DB_NAME=${POSTGRES_DB}
-export GITEA_DB_USER=${POSTGRES_USER}
-export GITEA_DB_PASSWD=${POSTGRES_PASSWORD}
+export GITEA_DB_NAME=gitea
+export GITEA_DB_USER=gitea
+export GITEA_DB_PASSWD=$(randomString16)
 export GITEA_DOMAIN_NAME=git.${ROOT_DOMAIN_NAME}
 
 # gitea中 创建的 app名称
