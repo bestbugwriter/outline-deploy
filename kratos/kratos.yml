@@ -21,8 +21,8 @@ log:
   format: text
 
 courier:
-  smtp:
-    connection_uri: smtp://localhost:1025/?skip_ssl_verify=true # Placeholder, configure if email verification/recovery is enabled
+  stub:
+    enabled: true
 
 identity:
   default_schema_id: default
