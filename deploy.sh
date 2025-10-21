@@ -36,22 +36,61 @@ function dockerComposeRestart() {
     popd || exit
 }
 
+# 检查并安装 jq
+function install_jq_if_missing() {
+    if ! command -v jq &> /dev/null
+    then
+        echo "jq is not installed. Attempting to install jq..."
+        sudo apt-get update && sudo apt-get install -y jq
+        if ! command -v jq &> /dev/null
+        then
+            echo "Failed to install jq. Please install jq manually and try again."
+            exit 1
+        fi
+        echo "jq installed successfully."
+    else
+        echo "jq is already installed."
+    fi
+}
+
 # 创建 Hydra 客户端
 function createHydraClientForOutline() {
     echo "Creating Hydra client for Outline..."
     # 等待 Hydra 启动
     sleep 10
-    docker run --rm --network br0 \
+
+    # Create the OAuth2 client and capture its output
+    CLIENT_OUTPUT=$(docker run --rm --network br0 \
         oryd/hydra:v2.2.0 create oauth2-client \
         --endpoint "http://${HYDRA_IP}:4445" \
-        --id "${HYDRA_CLIENT_ID}" \
-        --secret "${HYDRA_CLIENT_SECRET}" \
-        --grant-types "authorization_code,refresh_token,client_credentials" \
-        --response-types "code,id_token" \
-        --scope "openid profile email offline_access" \
+        --name "Outline" \
+        --grant-type authorization_code \
+        --grant-type refresh_token \
+        --response-type code \
+        --scope openid \
+        --scope profile \
+        --scope email \
+        --scope offline_access \
         --callbacks "${OUTLINE_ROOT_URL}/auth/oidc.callback" \
-        --name "Outline"
-    echo "Hydra client for Outline created."
+        --format json)
+
+    # Check if CLIENT_OUTPUT is empty or contains an error
+    if [ -z "$CLIENT_OUTPUT" ] || echo "$CLIENT_OUTPUT" | grep -q "error"; then
+        echo "Error creating Hydra client for Outline. Output: $CLIENT_OUTPUT"
+        exit 1
+    fi
+
+    # Parse the client ID and secret from the JSON output
+    export HYDRA_CLIENT_ID=$(echo "$CLIENT_OUTPUT" | jq -r '.client_id')
+    export HYDRA_CLIENT_SECRET=$(echo "$CLIENT_OUTPUT" | jq -r '.client_secret')
+
+    if [ -z "$HYDRA_CLIENT_ID" ] || [ -z "$HYDRA_CLIENT_SECRET" ]; then
+        echo "Error: Could not extract client_id or client_secret from Hydra client creation output."
+        echo "Output: $CLIENT_OUTPUT"
+        exit 1
+    fi
+
+    echo "Hydra client for Outline created. Client ID: ${HYDRA_CLIENT_ID}"
 }
 
 # 部署基础组件
@@ -170,6 +209,7 @@ function deployService() {
 
 # 主方法
 function main() {
+    install_jq_if_missing
     # 如果没有传入参数，或者传入的第一个参数是"help"，则显示帮助信息
     if [ -z "$1" ] || [ "$1" == "help" ]; then
         echo "用法： $0 [方法1|方法2] [参数...]"
