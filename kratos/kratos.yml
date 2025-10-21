@@ -21,7 +21,7 @@ log:
   format: text
 
 courier:
-  provider: stub
+  delivery_strategy: stub
 
 identity:
   default_schema_id: default

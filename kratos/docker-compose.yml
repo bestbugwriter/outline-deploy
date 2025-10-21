@@ -7,6 +7,8 @@ services:
     image: oryd/kratos:v1.1.0
     container_name: kratos
     restart: always
+    # 关键：告诉 Kratos 启动时加载哪个配置文件
+    command: serve -c /etc/config/kratos/kratos.yml --watch-courier
 
     environment:
       - DSN=postgres://${KRATOS_DB_USER}:${KRATOS_DB_PASSWORD}@${POSTGRES_IP}:5432/${KRATOS_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
