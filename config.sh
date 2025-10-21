@@ -98,7 +98,7 @@ export KRATOS_UI_IP=172.16.0.53
 # Domains
 export AUTH_DOMAIN_NAME=auth.${ROOT_DOMAIN_NAME}
 export AUTH_UI_DOMAIN_NAME=auth-ui.${ROOT_DOMAIN_NAME}
-export KRATOS_UI_DOMAIN_NAME=kratos.${ROOT_DOMAIN_NAME}
+export KRATOS_UI_DOMAIN_NAME=login.${ROOT_DOMAIN_NAME}
 
 # Hydra secrets and connection
 export HYDRA_SYSTEM_SECRET=$(randomString 32)

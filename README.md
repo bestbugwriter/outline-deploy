@@ -44,7 +44,7 @@ Outline, https://www.getoutline.com/
 
 需要一个 auth-ui.abc.com， 用于 Hydra 登录/授权页面。
 
-需要一个 kratos.abc.com， 用于 Kratos 自助账户页面（注册/登录/设置等）。
+需要一个 login.abc.com， 用于 Kratos 自助账户页面（注册/登录/设置等）。
 
 需要一个 outline.abc.com， 用于 Outline 服务访问。
 
