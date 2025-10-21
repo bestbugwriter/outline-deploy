@@ -27,6 +27,7 @@ export ADMIN_EMAIL=yywfqq@live.com
 # postgresql 配置
 export POSTGRES_IP=172.16.0.11
 export POSTGRES_DATA_DIR=./data
+export POSTGRES_DB=postgres
 # postgres 超级管理员账号
 export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=$(randomString16)
