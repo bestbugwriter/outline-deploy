@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# 如果存在 deploy.conf 文件，则加载它以重用之前的配置（特别是密码）
+if [ -f "deploy.conf" ]; then
+    echo "Found deploy.conf, loading existing configuration..."
+    # 我们需要导出变量，以便后续的脚本可以使用
+    set -a
+    source deploy.conf
+    set +a
+fi
+
 # 部署脚本
 # source config.sh
 . config.sh
@@ -29,8 +38,13 @@ function dockerComposeRestart() {
 
 # 部署基础组件
 function deployBase() {
-    echo "docker network create --driver=bridge --subnet=${DOCKER_SUBNET} br0"
-    docker network create --driver=bridge --subnet=${DOCKER_SUBNET} br0
+    # 检查 br0 网络是否存在，不存在则创建
+    if [ -z "$(docker network ls -q -f name=^br0$)" ]; then
+        echo "Network br0 not found, creating docker network: br0 with subnet ${DOCKER_SUBNET}"
+        docker network create --driver=bridge --subnet=${DOCKER_SUBNET} br0
+    else
+        echo "Network br0 already exists, skipping creation."
+    fi
 
     # 创建基础组件，这些是没有依赖的服务
     echo "create base component."
@@ -94,21 +108,29 @@ function deployService() {
     echo "Generate keycloak realm config file..."
     envsubst < "keycloak/realm-config.json.template" > "keycloak/realm-config.json"
 
-    # 部署 keycloak
-    echo "deploy keycloak"
-    dockerComposeUp keycloak
+        # 部署 keycloak
+        echo "deploy keycloak"
+        dockerComposeUp keycloak
     
-    # 部署 outline服务
-    echo "deploy outline"
-    dockerComposeUp outline
-
-    # 等待 outline 和 keycloak 启动完成
-    sleep 30
-
-    # 最后部署 https-portal，因为它依赖前面的服务
-    echo "deploy https-portal"
-    dockerComposeUp https-portal
-
+        # 等 keycloak 启动完成，后续的服务依赖它
+        echo "Waiting for Keycloak to start..."
+        sleep 60
+    
+        # 生成 outline 环境配置文件, 在 outline目录下
+        echo "Generate outline config file..."
+        envsubst < "outline/outline.env.template" > "outline/outline.env"
+    
+        # 部署 outline服务
+        echo "deploy outline"
+        dockerComposeUp outline
+    
+        # 等待 outline 启动完成
+        echo "Waiting for Outline to start..."
+        sleep 30
+    
+        # 最后部署 https-portal，因为它依赖前面的服务
+        echo "deploy https-portal"
+        dockerComposeUp https-portal
     # 判断是否创建 minio bucket
     if [ "$MINIO_ENABLED" = "true" ]; then
         echo "minio enabled, create default bucket and accessKey."
