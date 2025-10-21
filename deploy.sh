@@ -56,6 +56,27 @@ function install_jq_if_missing() {
     fi
 }
 
+# 等待服务启动
+function wait_for_service() {
+    local host=$1
+    local port=$2
+    local service_name=$3
+    local timeout=60
+    local count=0
+
+    echo "Waiting for $service_name at $host:$port to be ready..."
+    while ! nc -z $host $port >/dev/null 2>&1; do
+        if [ $count -ge $timeout ]; then
+            echo "$service_name at $host:$port did not become ready within $timeout seconds."
+            exit 1
+        fi
+        echo "$service_name not ready yet, waiting..."
+        sleep 1
+        count=$((count+1))
+    done
+    echo "$service_name at $host:$port is ready."
+}
+
 # 创建 Hydra 客户端
 
 # 部署基础组件
@@ -71,21 +92,17 @@ function deployBase() {
     # 创建基础组件，这些是没有依赖的服务
     echo "create base component."
     dockerComposeUp postgresql
+    wait_for_service ${POSTGRES_IP} 5432 "PostgreSQL"
     dockerComposeUp redis
-
-    # 等他们启动
-    sleep 20
 
     # 创建 gitea的服务，依赖 PostgreSQL
     echo "create gitea service."
     dockerComposeUp gitea
+    wait_for_service ${GITEA_IP} ${GITEA_PORT} "Gitea"
 
-    sleep 10
     # 创建 gitea的 管理员账号
     echo "create gitea admin user: ${GITEA_ADMIN_USER}."
     createGiteaAdmin "${GITEA_ADMIN_USER}" "${GITEA_ADMIN_PASSWORD}" "${GITEA_ADMIN_EMAIL}"
-
-    sleep 5
 
     # 创建 gitea的 应用，给 outline做oidc认证服务
     echo "create gitea app: ${GITEA_APP_NAME}."
