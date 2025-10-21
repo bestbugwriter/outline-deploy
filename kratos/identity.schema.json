@@ -1,0 +1,42 @@
+{
+  "$id": "https://schemas.ory.sh/kratos/latest/identity.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Person",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "E-Mail",
+      "ory.sh/kratos": {
+        "credentials": {
+          "password": {
+            "identifier": true
+          }
+        },
+        "verification": {
+          "via": "email"
+        },
+        "recovery": {
+          "via": "email"
+        }
+      }
+    },
+    "password": {
+      "type": "string",
+      "title": "Password",
+      "ory.sh/kratos": {
+        "credentials": {
+          "password": {
+            "type": "password"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "email",
+    "password"
+  ],
+  "additionalProperties": false
+}

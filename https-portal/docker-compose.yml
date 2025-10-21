@@ -11,8 +11,8 @@ services:
       - '80:80'
       - '443:443'
     environment:
-      DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT},${KEYCLOAK_DOMAIN_NAME} -> http://${KEYCLOAK_IP}:8080'
-      STAGE: 'production' # Or 'staging' for testing
+      DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT}'
+      STAGE: 'staging' # Or 'staging' for testing
       # FORCE_RENEW: 'true' # Uncomment to force renew certificates
     volumes:
       - ${HTTPS_PORTAL_DATA_DIR}:/var/lib/https-portal

@@ -36,6 +36,24 @@ function dockerComposeRestart() {
     popd || exit
 }
 
+# 创建 Hydra 客户端
+function createHydraClientForOutline() {
+    echo "Creating Hydra client for Outline..."
+    # 等待 Hydra 启动
+    sleep 10
+    docker run --rm --network br0 \
+        oryd/hydra:v2.2.0 clients create \
+        --endpoint "http://${HYDRA_IP}:4445" \
+        --id "${HYDRA_CLIENT_ID}" \
+        --secret "${HYDRA_CLIENT_SECRET}" \
+        --grant-types "authorization_code,refresh_token,client_credentials" \
+        --response-types "code,id_token" \
+        --scope "openid profile email offline_access" \
+        --callbacks "${OUTLINE_ROOT_URL}/auth/oidc.callback" \
+        --name "Outline"
+    echo "Hydra client for Outline created."
+}
+
 # 部署基础组件
 function deployBase() {
     # 检查 br0 网络是否存在，不存在则创建
@@ -50,9 +68,14 @@ function deployBase() {
     echo "create base component."
     dockerComposeUp postgresql
     dockerComposeUp redis
+    dockerComposeUp kratos
+    dockerComposeUp hydra
 
     # 等他们启动
     sleep 20
+
+    # 创建 Hydra 客户端
+    createHydraClientForOutline
 
     # minio 开关
     if [ "$MINIO_ENABLED" = "true" ]; then
@@ -84,13 +107,10 @@ function printConf() {
     echo "###############################################################################################"
     echo "###############################################################################################"
     echo "###############################################################################################"
-    echo "Keycloak Admin UI: https://${KEYCLOAK_DOMAIN_NAME}"
-    echo "Admin User: ${KEYCLOAK_ADMIN}"
-    echo "Admin Password: ${KEYCLOAK_ADMIN_PASSWORD}"
-    echo ""
-    echo "Default User for Outline:"
-    echo "Username: ${ADMIN_EMAIL}"
-    echo "Password: ${KEYCLOAK_ADMIN_PASSWORD} (same as admin password)"
+    echo "Kratos Admin UI: https://${KRATOS_DOMAIN_NAME}/admin"
+    echo "Kratos Public UI: https://${KRATOS_DOMAIN_NAME}/"
+    echo "Hydra Admin UI: https://${HYDRA_DOMAIN_NAME}/admin"
+    echo "Hydra Public UI: https://${HYDRA_DOMAIN_NAME}/"
     echo ""
     echo "Outline URL: https://${OUTLINE_DOMAIN_NAME}"
     echo "###############################################################################################"
@@ -104,17 +124,6 @@ function deployService() {
     echo "deploy base"
     deployBase
 
-    # 生成 keycloak realm 配置文件
-    echo "Generate keycloak realm config file..."
-    envsubst < "keycloak/realm-config.json.template" > "keycloak/realm-config.json"
-
-        # 部署 keycloak
-        echo "deploy keycloak"
-        dockerComposeUp keycloak
-    
-        # 等 keycloak 启动完成，后续的服务依赖它
-        echo "Waiting for Keycloak to start..."
-        sleep 60
     
         # 生成 outline 环境配置文件, 在 outline目录下
         echo "Generate outline config file..."

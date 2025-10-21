@@ -1,0 +1,24 @@
+networks:
+  br0:
+    external: true
+
+services:
+  hydra:
+    image: oryd/hydra:v2.2.0
+    container_name: hydra
+    restart: always
+
+    environment:
+      - DSN=postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASSWORD}@${POSTGRES_IP}:5432/${HYDRA_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
+      - URLS_SELF_ISSUER=https://${HYDRA_DOMAIN_NAME}/
+      - URLS_CONSENT=https://${KRATOS_DOMAIN_NAME}/consent
+      - URLS_LOGIN=https://${KRATOS_DOMAIN_NAME}/login
+      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
+      - OAUTH2_EXPOSE_INTERNAL_ERRORS=true
+      - LOG_LEVEL=info
+      - LOG_FORMAT=text
+      - SERVE_PUBLIC_PORT=4444
+      - SERVE_ADMIN_PORT=4445
+    networks:
+      br0:
+        ipv4_address: ${HYDRA_IP}

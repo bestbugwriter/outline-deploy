@@ -1,0 +1,43 @@
+networks:
+  br0:
+    external: true
+
+services:
+  kratos:
+    image: oryd/kratos:v1.1.0
+    container_name: kratos
+    restart: always
+
+    environment:
+      - DSN=postgres://${KRATOS_DB_USER}:${KRATOS_DB_PASSWORD}@${POSTGRES_IP}:5432/${KRATOS_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
+      - KRATOS_URL=https://${KRATOS_DOMAIN_NAME}
+      - KRATOS_PUBLIC_URL=https://${KRATOS_DOMAIN_NAME}
+      - KRATOS_ADMIN_URL=http://${KRATOS_IP}:4434
+      - SECRETS_COOKIE=${KRATOS_SECRET_COOKIE}
+      - SECRETS_CIPHER=${KRATOS_SECRET_CIPHER}
+      - LOG_LEVEL=info
+      - LOG_FORMAT=text
+      - SELFSERVICE_DEFAULT_BROWSER_RETURN_URL=https://${OUTLINE_DOMAIN_NAME}/
+      - SELFSERVICE_WHITELISTED_RETURN_URLS=https://${OUTLINE_DOMAIN_NAME}/
+      - SELFSERVICE_METHODS_PASSWORD_ENABLED=true
+      - SELFSERVICE_FLOWS_ERROR_UI_URL=https://${KRATOS_DOMAIN_NAME}/error
+      - SELFSERVICE_FLOWS_SETTINGS_UI_URL=https://${KRATOS_DOMAIN_NAME}/settings
+      - SELFSERVICE_FLOWS_RECOVERY_ENABLED=true
+      - SELFSERVICE_FLOWS_RECOVERY_UI_URL=https://${KRATOS_DOMAIN_NAME}/recovery
+      - SELFSERVICE_FLOWS_VERIFICATION_ENABLED=false
+      - SELFSERVICE_FLOWS_VERIFICATION_UI_URL=https://${KRATOS_DOMAIN_NAME}/verification
+      - SELFSERVICE_FLOWS_LOGIN_UI_URL=https://${KRATOS_DOMAIN_NAME}/login
+      - SELFSERVICE_FLOWS_LOGIN_LIFESPAN=10h
+      - SELFSERVICE_FLOWS_LOGOUT_AFTER_DEFAULT_BROWSER_RETURN_URL=https://${KRATOS_DOMAIN_NAME}/login
+      - SELFSERVICE_FLOWS_REGISTRATION_LIFESPAN=10h
+      - SELFSERVICE_FLOWS_REGISTRATION_UI_URL=https://${KRATOS_DOMAIN_NAME}/registration
+      - SELFSERVICE_FLOWS_REGISTRATION_AFTER_PASSWORD_HOOKS=session
+      - IDENTITY_DEFAULT_SCHEMA_ID=default
+      - IDENTITY_SCHEMAS_0_ID=default
+      - IDENTITY_SCHEMAS_0_URL=file:///etc/config/kratos/identity.schema.json
+    volumes:
+      - ./kratos.yml:/etc/config/kratos/kratos.yml
+      - ./identity.schema.json:/etc/config/kratos/identity.schema.json # Assuming you have an identity schema
+    networks:
+      br0:
+        ipv4_address: ${KRATOS_IP}

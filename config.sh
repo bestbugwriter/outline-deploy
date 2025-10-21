@@ -36,10 +36,7 @@ export OUTLINE_DB_USER=outline
 export OUTLINE_DB_PASSWORD=$(randomString16)
 export OUTLINE_DB_NAME=outline
 
-# keycloak 数据库账号
-export KEYCLOAK_DB_USER=keycloak
-export KEYCLOAK_DB_PASSWORD=$(randomString16)
-export KEYCLOAK_DB_NAME=keycloak
+
 
 
 ################
@@ -82,32 +79,6 @@ export OUTLINE_MINIO_BUCKET=outline
 export HTTPS_PORTAL_IP=172.16.0.40
 export HTTPS_PORTAL_DATA_DIR=./data
 
-
-################
-## Keycloak IAM
-export KEYCLOAK_IP=172.16.0.50
-export KEYCLOAK_DOMAIN_NAME=auth.${ROOT_DOMAIN_NAME}
-
-# Keycloak Admin credentials
-export KEYCLOAK_ADMIN=admin
-export KEYCLOAK_ADMIN_PASSWORD=$(randomString16)
-
-# Keycloak's connection to PostgreSQL.
-# It uses the main postgres user to connect and will manage its own database.
-export KEYCLOAK_DB_NAME=keycloak
-
-# Environment variables that the Keycloak container will use
-export KC_DB=postgres
-export KC_DB_URL_HOST=${POSTGRES_IP}
-export KC_DB_URL_DATABASE=${KEYCLOAK_DB_NAME}
-export KC_DB_USERNAME=${KEYCLOAK_DB_USER}
-export KC_DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
-export KC_HOSTNAME=${KEYCLOAK_DOMAIN_NAME}
-
-# Details for the realm and OIDC client for Outline
-export KEYCLOAK_REALM=outline
-export KEYCLOAK_CLIENT_ID=outline
-export KEYCLOAK_CLIENT_SECRET=$(randomString 32)
 
 
 ################
@@ -156,3 +127,36 @@ export GRIST_PORT=8484
 export GRIST_DATA_DIR=./persist
 export GRIST_DOMAIN_NAME=drist.${ROOT_DOMAIN_NAME}
 export GRIST_DEFAULT_EMAIL=${ADMIN_EMAIL}
+
+
+################
+## Ory Kratos (Identity Management)
+export KRATOS_IP=172.16.0.51
+export KRATOS_DOMAIN_NAME=login.${ROOT_DOMAIN_NAME}
+
+# Kratos database credentials
+export KRATOS_DB_USER=kratos
+export KRATOS_DB_PASSWORD=$(randomString16)
+export KRATOS_DB_NAME=kratos
+
+# Kratos secrets
+export KRATOS_SECRET_COOKIE=$(randomString 32)
+export KRATOS_SECRET_CIPHER=$(randomString 32)
+
+
+################
+## Ory Hydra (OAuth2 & OpenID Connect Provider)
+export HYDRA_IP=172.16.0.52
+export HYDRA_DOMAIN_NAME=auth.${ROOT_DOMAIN_NAME}
+
+# Hydra database credentials
+export HYDRA_DB_USER=hydra
+export HYDRA_DB_PASSWORD=$(randomString16)
+export HYDRA_DB_NAME=hydra
+
+# Hydra system secret
+export HYDRA_SYSTEM_SECRET=$(randomString 32)
+
+# Hydra client for Outline
+export HYDRA_CLIENT_ID=outline-client
+export HYDRA_CLIENT_SECRET=$(randomString 32)
