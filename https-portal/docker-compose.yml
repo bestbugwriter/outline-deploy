@@ -1,0 +1,21 @@
+networks:
+  br0:
+    external: true
+
+services:
+  https-portal:
+    image: steveltn/https-portal:1
+    container_name: https-portal
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT}'
+      STAGE: 'staging' # Or 'staging' for testing
+      # FORCE_RENEW: 'true' # Uncomment to force renew certificates
+    volumes:
+      - ${HTTPS_PORTAL_DATA_DIR}:/var/lib/https-portal
+    networks:
+      br0:
+        ipv4_address: ${HTTPS_PORTAL_IP} # You need to define this IP in your config.sh

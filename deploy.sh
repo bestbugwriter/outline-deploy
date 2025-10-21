@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# 如果存在 deploy.conf 文件，则加载它以重用之前的配置（特别是密码）
+if [ -f "deploy.conf" ]; then
+    echo "Found deploy.conf, loading existing configuration..."
+    # 我们需要导出变量，以便后续的脚本可以使用
+    set -a
+    source deploy.conf
+    set +a
+fi
+
 # 部署脚本
 # source config.sh
 . config.sh
@@ -12,9 +21,6 @@
 
 # source minio/minio.sh, minio function
 . minio/minio.sh
-
-# source nginxproxymanager/npm.sh
-. nginxproxymanager/npm.sh
 
 # docker compose 启动
 function dockerComposeUp() {
@@ -33,31 +39,59 @@ function dockerComposeRestart() {
     popd || exit
 }
 
-# 创建 nginx proxy manager 的数据库
-function createDbNPM() {
-    execMySQL "create database ${MYSQL_NPM_DB}"
-    execMySQL "grant all privileges on ${MYSQL_NPM_DB}.* to '${MYSQL_USER}'@'%'"
+# 检查并安装 jq
+
+# 等待服务启动
+function wait_for_service() {
+    local host=$1
+    local port=$2
+    local service_name=$3
+    local timeout=60
+    local count=0
+
+    echo "Waiting for $service_name at $host:$port to be ready..."
+    while ! nc -z $host $port >/dev/null 2>&1; do
+        if [ $count -ge $timeout ]; then
+            echo "$service_name at $host:$port did not become ready within $timeout seconds."
+            exit 1
+        fi
+        echo "$service_name not ready yet, waiting..."
+        sleep 1
+        count=$((count+1))
+    done
+    echo "$service_name at $host:$port is ready."
 }
 
-# 在 MySQL的 docker容器中执行sql
-function execMySQL() {
-    echo "docker exec -it mysql mysql -e '$1'"
-    docker exec -it mysql mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "$1"
-}
+# 创建 Hydra 客户端
 
 # 部署基础组件
 function deployBase() {
-    echo "docker network create --driver=bridge --subnet=${DOCKER_SUBNET} br0"
-    docker network create --driver=bridge --subnet=${DOCKER_SUBNET} br0
+    # 检查 br0 网络是否存在，不存在则创建
+    if [ -z "$(docker network ls -q -f name=^br0$)" ]; then
+        echo "Network br0 not found, creating docker network: br0 with subnet ${DOCKER_SUBNET}"
+        docker network create --driver=bridge --subnet=${DOCKER_SUBNET} br0
+    else
+        echo "Network br0 already exists, skipping creation."
+    fi
 
     # 创建基础组件，这些是没有依赖的服务
     echo "create base component."
-    dockerComposeUp mysql
     dockerComposeUp postgresql
+    wait_for_service ${POSTGRES_IP} 5432 "PostgreSQL"
     dockerComposeUp redis
 
-    # 等他们启动
-    sleep 20
+    # 创建 gitea的服务，依赖 PostgreSQL
+    echo "create gitea service."
+    dockerComposeUp gitea
+    wait_for_service ${GITEA_IP} ${GITEA_PORT} "Gitea"
+
+    # 创建 gitea的 管理员账号
+    echo "create gitea admin user: ${GITEA_ADMIN_USER}."
+    createGiteaAdmin "${GITEA_ADMIN_USER}" "${GITEA_ADMIN_PASSWORD}" "${GITEA_ADMIN_EMAIL}"
+
+    # 创建 gitea的 应用，给 outline做oidc认证服务
+    echo "create gitea app: ${GITEA_APP_NAME}."
+    createGiteaApp "${GITEA_ADMIN_USER}" "${GITEA_ADMIN_PASSWORD}" "${GITEA_APP_NAME}" "${OUTLINE_ROOT_URL}/auth/oidc.callback"
 
     # minio 开关
     if [ "$MINIO_ENABLED" = "true" ]; then
@@ -82,28 +116,42 @@ function deployBase() {
     else
         echo "grist disabled, do not create grist container."
     fi
+}
 
-    # 创建 gitea的服务，依赖 MySQL
-    echo "create gitea service."
-    dockerComposeUp gitea
+# 打印关键信息
+function printConf() {
+    echo "###############################################################################################"
+    echo "###############################################################################################"
+    echo "###############################################################################################"
+    echo "Outline URL: https://${OUTLINE_DOMAIN_NAME}"
+    echo "gitea              https://${GITEA_DOMAIN_NAME} -> http://${GITEA_IP}:${GITEA_PORT}, user ${GITEA_ADMIN_USER}, password ${GITEA_ADMIN_PASSWORD}"
+    echo "###############################################################################################"
+    echo "###############################################################################################"
+    echo "###############################################################################################"
+}
 
-    sleep 10
-    # 创建 nginx proxy manager 的 MySQL数据库， 创建 nginx proxy manager的服务，依赖MySQL
-    echo "create nginx proxy manager database and service."
-    createDbNPM
-    dockerComposeUp nginxproxymanager
+# 部署方法，部署基本组件 + outline服务
+function deployService() {
+    # 部署基础服务
+    echo "deploy base"
+    deployBase
 
-    sleep 10
-    # 创建 gitea的 管理员账号
-    echo "create gitea admin user: ${GITEA_ADMIN_USER}."
-    createGiteaAdmin "${GITEA_ADMIN_USER}" "${GITEA_ADMIN_PASSWORD}" "${GITEA_ADMIN_EMAIL}"
-
-    sleep 5
-
-    # 创建 gitea的 应用，给 outline做oidc认证服务
-    echo "create gitea app: ${GITEA_APP_NAME}."
-    createGiteaApp "${GITEA_ADMIN_USER}" "${GITEA_ADMIN_PASSWORD}" "${GITEA_APP_NAME}" "${OUTLINE_ROOT_URL}/auth/oidc.callback"
-
+    
+        # 生成 outline 环境配置文件, 在 outline目录下
+        echo "Generate outline config file..."
+        envsubst < "outline/outline.env.template" > "outline/outline.env"
+    
+        # 部署 outline服务
+        echo "deploy outline"
+        dockerComposeUp outline
+    
+        # 等待 outline 启动完成
+        echo "Waiting for Outline to start..."
+        sleep 30
+    
+        # 最后部署 https-portal，因为它依赖前面的服务
+        echo "deploy https-portal"
+        dockerComposeUp https-portal
     # 判断是否创建 minio bucket
     if [ "$MINIO_ENABLED" = "true" ]; then
         echo "minio enabled, create default bucket and accessKey."
@@ -112,50 +160,6 @@ function deployBase() {
     else
         echo "minio disabled, do not create default bucket and accessKey."
     fi
-}
-
-# 打印关键信息
-function printConf() {
-    echo "###############################################################################################"
-    echo "###############################################################################################"
-    echo "###############################################################################################"
-    echo "nginxproxymanager  http://${ROOT_DOMAIN_NAME}:81, user ${NPM_ADMIN_USER}, password ${NPM_ADMIN_PASSWORD}"
-    echo "minio-s3           https://${MINIO_S3API_DOMAIN_NAME} -> http://${MINIO_IP}:${MINIO_S3_PORT}"
-    echo "gitea              https://${GITEA_DOMAIN_NAME} -> http://${GITEA_IP}:${GITEA_PORT}, user ${GITEA_ADMIN_USER}, password ${GITEA_ADMIN_PASSWORD}"
-    echo "outline            https://${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT}"
-    echo "drawio             https://${DRAWIO_DOMAIN_NAME} -> http://${DRAWIO_IP}:${DRAWIO_PORT}"
-    echo "grist              https://${GRIST_DOMAIN_NAME} -> http://${GRIST_IP}:${GRIST_PORT}"
-    echo "###############################################################################################"
-    echo "###############################################################################################"
-    echo "###############################################################################################"
-}
-
-# 部署方法，部署基本组件 + outline服务
-# 创建 nginxproxymanager 配置
-function deployService() {
-    env > deploy.env
-
-    # 部署基础服务
-    echo "deploy base"
-    deployBase
-
-    # 生成 outline 环境配置文件, 在 outline目录下
-    envsubst < "./outline/${OUTLINE_ENV_FILE_TEMPLATE}" > "./outline/${OUTLINE_ENV_FILE}"
-
-    # 部署 outline服务
-    echo "deploy outline"
-    dockerComposeUp outline
-
-    # 这里等一下 nginxproxymanager service 不一定启动完成，20241031-这个时间还是不够，会导致后面的改密码 改名字 add host都失败，需要增加一个单独的补救命令
-    # npm登录502，可能是因为启动下载IP-ranges.json超时，导致启动卡住，pr还没合，可以通过修改容器中的 /app/index.js 
-    sleep 60
-    # nginxproxymanager需要首次登录时修改 账号和密码
-    echo "nginxproxymanager change account"
-    changeAccount
-
-    # nginxproxymanager 增加代理服务
-    echo "nginxproxymanager add proxy hosts"
-    addProxyHosts
 
     # 输出环境变量到本地文件
     echo "save env to deploy.conf"
@@ -195,4 +199,4 @@ function main() {
     fi
 }
 
-main $@
+main "$@"
