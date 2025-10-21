@@ -4,7 +4,7 @@ networks:
 
 services:
   mailhog:
-    image: mailhog/mailhog:1.0.1
+    image: mailhog/mailhog:v1.0.1
     container_name: mailhog
     restart: always
     logging:
