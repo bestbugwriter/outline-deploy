@@ -1,0 +1,51 @@
+networks:
+  br0:
+    external: true
+
+services:
+  kratos-migrate:
+    image: oryd/kratos:v1.2.0
+    container_name: kratos-migrate
+    environment:
+      - DSN=${KRATOS_DSN}
+    command: ["migrate", "sql", "-e", "--yes"]
+    restart: on-failure
+    networks:
+      br0:
+        ipv4_address: ${KRATOS_IP}
+
+  kratos:
+    image: oryd/kratos:v1.2.0
+    container_name: kratos
+    depends_on:
+      - kratos-migrate
+    environment:
+      - DSN=${KRATOS_DSN}
+      - LOG_LEVEL=info
+    volumes:
+      - ./kratos.yml:/etc/config/kratos.yml:ro
+      - ./identity.schema.json:/etc/config/identity.schema.json:ro
+    command: ["serve", "-c", "/etc/config/kratos.yml", "--dev"]
+    ports:
+      - "4433:4433" # public
+      - "4434:4434" # admin
+    networks:
+      br0:
+        ipv4_address: ${KRATOS_IP}
+    restart: unless-stopped
+
+  kratos-selfservice-ui:
+    image: oryd/kratos-selfservice-ui-node:latest
+    container_name: kratos-ui
+    environment:
+      - KRATOS_PUBLIC_URL=http://kratos:4433
+      - BASE_URL=https://${KRATOS_UI_DOMAIN_NAME}
+      - PORT=4455
+    ports:
+      - "4455:4455"
+    depends_on:
+      - kratos
+    networks:
+      br0:
+        ipv4_address: ${KRATOS_UI_IP}
+    restart: unless-stopped

@@ -1,2 +1,6 @@
 /.venv/
 /.idea/
+# Ignore generated env and data directories
+**/data/
+**/logs/
+deploy.conf

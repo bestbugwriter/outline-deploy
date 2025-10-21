@@ -1,0 +1,47 @@
+networks:
+  br0:
+    external: true
+
+services:
+  hydra:
+    image: oryd/hydra:v2.2.0
+    container_name: hydra
+    environment:
+      - DSN=${HYDRA_DSN}
+      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
+      - URLS_SELF_ISSUER=https://${AUTH_DOMAIN_NAME}
+      - URLS_LOGIN=https://${AUTH_UI_DOMAIN_NAME}/login
+      - URLS_CONSENT=https://${AUTH_UI_DOMAIN_NAME}/consent
+      - SERVE_PUBLIC_HOST=0.0.0.0
+      - SERVE_PUBLIC_PORT=4444
+      - SERVE_ADMIN_HOST=0.0.0.0
+      - SERVE_ADMIN_PORT=4445
+      - LOG_LEVEL=info
+      - OAUTH2_EXPOSE_INTERNAL_ERRORS=true
+    command: serve all --dev --dangerous-auto-migrate --dangerous-force-http
+    ports:
+      - "4444:4444" # public
+      - "4445:4445" # admin
+    networks:
+      br0:
+        ipv4_address: ${HYDRA_IP}
+    restart: unless-stopped
+
+  hydra-login-consent:
+    image: oryd/hydra-login-consent-node:latest
+    container_name: hydra-login-consent
+    environment:
+      - PORT=3000
+      - BASE_URL=https://${AUTH_UI_DOMAIN_NAME}
+      - HYDRA_ADMIN_URL=http://hydra:4445
+      - KRATOS_PUBLIC_URL=http://kratos:4433
+      - KRATOS_BROWSER_URL=https://${KRATOS_UI_DOMAIN_NAME}
+      - COOKIE_SECRET=${HYDRA_SYSTEM_SECRET}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - hydra
+    networks:
+      br0:
+        ipv4_address: ${HYDRA_CONSENT_UI_IP}
+    restart: unless-stopped

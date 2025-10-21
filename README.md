@@ -4,11 +4,11 @@
 
 outline的部署脚本。 使用 docker-compose管理。
 
-使用自建的 nginxproxymanager管理各个服务的反向代理、自动申请https证书。
+使用自建的 https-portal 管理各个服务的反向代理、自动申请 https 证书。
 
-使用自建的 gitea 的 应用作为 outline的 oidc 认证提供商。不再使用 默认的slack。
+使用 Ory Hydra + Ory Kratos 作为 Outline 的 OIDC 认证提供商。不再使用默认的 Slack。
 
-使用自建的 minio 作为S3 提供商。可选，可以配置其他S3 提供商，比如 阿里云，腾讯云。
+使用自建的 minio 作为 S3 提供商。可选，可以配置其他 S3 提供商，比如 阿里云，腾讯云。
 
 使用自建的 MySQL、Postgresql、Redis 容器作为数据存储。
 
@@ -20,13 +20,15 @@ Postgresql, https://www.postgresql.org/
 
 Redis, https://redis.io/
 
-minio, https://min.io/
+MinIO, https://min.io/
 
-gitea, https://docs.gitea.com/
+Ory Hydra, https://www.ory.sh/hydra/
 
-nginx proxy manager, https://nginxproxymanager.com/
+Ory Kratos, https://www.ory.sh/kratos/
 
-outline, https://www.getoutline.com/
+https-portal, https://github.com/SteveLTN/https-portal
+
+Outline, https://www.getoutline.com/
 
 ## 准备
 
@@ -38,13 +40,17 @@ outline, https://www.getoutline.com/
 
 比如我有一个域名 abc.com
 
-需要一个 gitea.abc.com, 用于gitea服务访问。
+需要一个 auth.abc.com， 用于 OIDC 发行人（Hydra public）。
 
-需要一个 outline.abc.com， 用于 outline 服务访问。
+需要一个 auth-ui.abc.com， 用于 Hydra 登录/授权页面。
 
-需要一个 minio-s3.abc.com，用于 s3 接口上传下载文件使用。
+需要一个 kratos.abc.com， 用于 Kratos 自助账户页面（注册/登录/设置等）。
 
-需要一个 minio.abc.com，用于 s3 web服务的访问（可选）。
+需要一个 outline.abc.com， 用于 Outline 服务访问。
+
+需要一个 minio-s3.abc.com，用于 S3 接口上传下载文件使用。
+
+需要一个 minio.abc.com，用于 S3 Web 服务的访问（可选）。
 
 ## 部署
 

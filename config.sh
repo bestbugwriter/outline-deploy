@@ -36,10 +36,15 @@ export OUTLINE_DB_USER=outline
 export OUTLINE_DB_PASSWORD=$(randomString16)
 export OUTLINE_DB_NAME=outline
 
-# keycloak 数据库账号
-export KEYCLOAK_DB_USER=keycloak
-export KEYCLOAK_DB_PASSWORD=$(randomString16)
-export KEYCLOAK_DB_NAME=keycloak
+# hydra 数据库账号
+export HYDRA_DB_USER=hydra
+export HYDRA_DB_PASSWORD=$(randomString16)
+export HYDRA_DB_NAME=hydra
+
+# kratos 数据库账号
+export KRATOS_DB_USER=kratos
+export KRATOS_DB_PASSWORD=$(randomString16)
+export KRATOS_DB_NAME=kratos
 
 
 ################
@@ -84,30 +89,28 @@ export HTTPS_PORTAL_DATA_DIR=./data
 
 
 ################
-## Keycloak IAM
-export KEYCLOAK_IP=172.16.0.50
-export KEYCLOAK_DOMAIN_NAME=auth.${ROOT_DOMAIN_NAME}
+## Ory Hydra + Kratos
+export HYDRA_IP=172.16.0.50
+export HYDRA_CONSENT_UI_IP=172.16.0.51
+export KRATOS_IP=172.16.0.52
+export KRATOS_UI_IP=172.16.0.53
 
-# Keycloak Admin credentials
-export KEYCLOAK_ADMIN=admin
-export KEYCLOAK_ADMIN_PASSWORD=$(randomString16)
+# Domains
+export AUTH_DOMAIN_NAME=auth.${ROOT_DOMAIN_NAME}
+export AUTH_UI_DOMAIN_NAME=auth-ui.${ROOT_DOMAIN_NAME}
+export KRATOS_UI_DOMAIN_NAME=kratos.${ROOT_DOMAIN_NAME}
 
-# Keycloak's connection to PostgreSQL.
-# It uses the main postgres user to connect and will manage its own database.
-export KEYCLOAK_DB_NAME=keycloak
+# Hydra secrets and connection
+export HYDRA_SYSTEM_SECRET=$(randomString 32)
+export HYDRA_DSN=postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASSWORD}@${POSTGRES_IP}:5432/${HYDRA_DB_NAME}?sslmode=disable
 
-# Environment variables that the Keycloak container will use
-export KC_DB=postgres
-export KC_DB_URL_HOST=${POSTGRES_IP}
-export KC_DB_URL_DATABASE=${KEYCLOAK_DB_NAME}
-export KC_DB_USERNAME=${KEYCLOAK_DB_USER}
-export KC_DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
-export KC_HOSTNAME=${KEYCLOAK_DOMAIN_NAME}
+# OAuth2 client for Outline in Hydra
+export HYDRA_CLIENT_ID=outline
+export HYDRA_CLIENT_SECRET=$(randomString 32)
 
-# Details for the realm and OIDC client for Outline
-export KEYCLOAK_REALM=outline
-export KEYCLOAK_CLIENT_ID=outline
-export KEYCLOAK_CLIENT_SECRET=$(randomString 32)
+# Kratos connection
+export KRATOS_DSN=postgres://${KRATOS_DB_USER}:${KRATOS_DB_PASSWORD}@${POSTGRES_IP}:5432/${KRATOS_DB_NAME}?sslmode=disable
+export KRATOS_SECRET=$(randomString 32)
 
 
 ################

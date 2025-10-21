@@ -1,0 +1,43 @@
+log:
+  level: info
+
+secrets:
+  default:
+    - ${KRATOS_SECRET}
+
+serve:
+  public:
+    base_url: http://kratos:4433/
+  admin:
+    base_url: http://kratos:4434/
+
+selfservice:
+  default_browser_return_url: https://${AUTH_UI_DOMAIN_NAME}
+  allowed_return_urls:
+    - https://${AUTH_UI_DOMAIN_NAME}
+    - https://${KRATOS_UI_DOMAIN_NAME}
+  flows:
+    login:
+      ui_url: https://${KRATOS_UI_DOMAIN_NAME}/login
+    registration:
+      ui_url: https://${KRATOS_UI_DOMAIN_NAME}/registration
+    settings:
+      ui_url: https://${KRATOS_UI_DOMAIN_NAME}/settings
+    recovery:
+      ui_url: https://${KRATOS_UI_DOMAIN_NAME}/recovery
+    verification:
+      ui_url: https://${KRATOS_UI_DOMAIN_NAME}/verification
+
+cookies:
+  domain: .${ROOT_DOMAIN_NAME}
+
+identity:
+  default_schema_id: default
+  schemas:
+    - id: default
+      url: file:///etc/config/identity.schema.json
+
+courier:
+  provider: "smtp"
+  smtp:
+    connection_uri: smtps://user:pass@localhost:1025/?skip_ssl_verify=true

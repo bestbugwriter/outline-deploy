@@ -11,7 +11,7 @@ services:
       - '80:80'
       - '443:443'
     environment:
-      DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT},${KEYCLOAK_DOMAIN_NAME} -> http://${KEYCLOAK_IP}:8080'
+      DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT},${AUTH_DOMAIN_NAME} -> http://${HYDRA_IP}:4444,${AUTH_UI_DOMAIN_NAME} -> http://${HYDRA_CONSENT_UI_IP}:3000,${KRATOS_UI_DOMAIN_NAME} -> http://${KRATOS_UI_IP}:4455'
       STAGE: 'production' # Or 'staging' for testing
       # FORCE_RENEW: 'true' # Uncomment to force renew certificates
     volumes:

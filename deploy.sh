@@ -84,13 +84,9 @@ function printConf() {
     echo "###############################################################################################"
     echo "###############################################################################################"
     echo "###############################################################################################"
-    echo "Keycloak Admin UI: https://${KEYCLOAK_DOMAIN_NAME}"
-    echo "Admin User: ${KEYCLOAK_ADMIN}"
-    echo "Admin Password: ${KEYCLOAK_ADMIN_PASSWORD}"
-    echo ""
-    echo "Default User for Outline:"
-    echo "Username: ${ADMIN_EMAIL}"
-    echo "Password: ${KEYCLOAK_ADMIN_PASSWORD} (same as admin password)"
+    echo "Hydra (OIDC Issuer): https://${AUTH_DOMAIN_NAME}"
+    echo "Hydra Login/Consent App: https://${AUTH_UI_DOMAIN_NAME}"
+    echo "Kratos Self-Service UI: https://${KRATOS_UI_DOMAIN_NAME}"
     echo ""
     echo "Outline URL: https://${OUTLINE_DOMAIN_NAME}"
     echo "###############################################################################################"
@@ -104,33 +100,58 @@ function deployService() {
     echo "deploy base"
     deployBase
 
-    # 生成 keycloak realm 配置文件
-    echo "Generate keycloak realm config file..."
-    envsubst < "keycloak/realm-config.json.template" > "keycloak/realm-config.json"
+    # 生成 Kratos 配置文件
+    echo "Generate kratos config file..."
+    envsubst < "kratos/kratos.yml.template" > "kratos/kratos.yml"
 
-        # 部署 keycloak
-        echo "deploy keycloak"
-        dockerComposeUp keycloak
-    
-        # 等 keycloak 启动完成，后续的服务依赖它
-        echo "Waiting for Keycloak to start..."
-        sleep 60
-    
-        # 生成 outline 环境配置文件, 在 outline目录下
-        echo "Generate outline config file..."
-        envsubst < "outline/outline.env.template" > "outline/outline.env"
-    
-        # 部署 outline服务
-        echo "deploy outline"
-        dockerComposeUp outline
-    
-        # 等待 outline 启动完成
-        echo "Waiting for Outline to start..."
-        sleep 30
-    
-        # 最后部署 https-portal，因为它依赖前面的服务
-        echo "deploy https-portal"
-        dockerComposeUp https-portal
+    # 部署 Kratos (身份服务)
+    echo "deploy kratos"
+    dockerComposeUp kratos
+
+    # 部署 Hydra (OIDC) 及其 Login/Consent 应用
+    echo "deploy hydra"
+    dockerComposeUp hydra
+
+    # 等待 Hydra 启动完成，后续需要创建 OAuth2 Client
+    echo "Waiting for Hydra to start..."
+    sleep 60
+
+    # 创建 Outline 的 OAuth2 Client（若已存在则忽略错误）
+    echo "Create Hydra OAuth2 client for Outline"
+    docker exec hydra hydra create oauth2-client --endpoint http://localhost:4445 \
+      --id "${HYDRA_CLIENT_ID}" \
+      --secret "${HYDRA_CLIENT_SECRET}" \
+      --name "Outline" \
+      --grant-type "authorization_code,refresh_token" \
+      --response-type "code" \
+      --scope "openid,profile,email,offline_access" \
+      --redirect-uri "https://${OUTLINE_DOMAIN_NAME}/auth/oidc.callback" \
+      --token-endpoint-auth-method "client_secret_basic" >/dev/null 2>&1 || \
+    docker exec hydra hydra clients create --endpoint http://localhost:4445 \
+      --id "${HYDRA_CLIENT_ID}" \
+      --secret "${HYDRA_CLIENT_SECRET}" \
+      --name "Outline" \
+      --grant-types "authorization_code,refresh_token" \
+      --response-types "code" \
+      --scope "openid,profile,email,offline_access" \
+      --redirect-uris "https://${OUTLINE_DOMAIN_NAME}/auth/oidc.callback" \
+      --token-endpoint-auth-method "client_secret_basic" >/dev/null 2>&1 || true
+
+    # 生成 outline 环境配置文件, 在 outline目录下
+    echo "Generate outline config file..."
+    envsubst < "outline/outline.env.template" > "outline/outline.env"
+
+    # 部署 outline服务
+    echo "deploy outline"
+    dockerComposeUp outline
+
+    # 等待 outline 启动完成
+    echo "Waiting for Outline to start..."
+    sleep 30
+
+    # 最后部署 https-portal，因为它依赖前面的服务
+    echo "deploy https-portal"
+    dockerComposeUp https-portal
     # 判断是否创建 minio bucket
     if [ "$MINIO_ENABLED" = "true" ]; then
         echo "minio enabled, create default bucket and accessKey."
