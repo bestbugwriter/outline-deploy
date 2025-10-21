@@ -11,8 +11,7 @@ services:
     command: ["migrate", "sql", "-e", "--yes"]
     restart: on-failure
     networks:
-      br0:
-        # No static IP for migrate job
+      - br0
 
   kratos:
     image: oryd/kratos:v1.2.0
