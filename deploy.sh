@@ -16,6 +16,9 @@ fi
 # source docker.sh
 . docker.sh
 
+# source gitea/gitea.sh, gitea function
+. gitea/gitea.sh
+
 # source minio/minio.sh, minio function
 . minio/minio.sh
 
@@ -54,44 +57,6 @@ function install_jq_if_missing() {
 }
 
 # 创建 Hydra 客户端
-function createHydraClientForOutline() {
-    echo "Creating Hydra client for Outline..."
-    # 等待 Hydra 启动
-    sleep 10
-
-    # Create the OAuth2 client and capture its output
-    CLIENT_OUTPUT=$(docker run --rm --network br0 \
-        oryd/hydra:v2.2.0 create oauth2-client \
-        --endpoint "http://${HYDRA_IP}:4445" \
-        --name "Outline" \
-        --grant-type authorization_code \
-        --grant-type refresh_token \
-        --response-type code \
-        --scope openid \
-        --scope profile \
-        --scope email \
-        --scope offline_access \
-        --redirect-uri "${OUTLINE_ROOT_URL}/auth/oidc.callback" \
-        --format json)
-
-    # Check if CLIENT_OUTPUT is empty or contains an error
-    if [ -z "$CLIENT_OUTPUT" ] || echo "$CLIENT_OUTPUT" | grep -q "error"; then
-        echo "Error creating Hydra client for Outline. Output: $CLIENT_OUTPUT"
-        exit 1
-    fi
-
-    # Parse the client ID and secret from the JSON output
-    export HYDRA_CLIENT_ID=$(echo "$CLIENT_OUTPUT" | jq -r '.client_id')
-    export HYDRA_CLIENT_SECRET=$(echo "$CLIENT_OUTPUT" | jq -r '.client_secret')
-
-    if [ -z "$HYDRA_CLIENT_ID" ] || [ -z "$HYDRA_CLIENT_SECRET" ]; then
-        echo "Error: Could not extract client_id or client_secret from Hydra client creation output."
-        echo "Output: $CLIENT_OUTPUT"
-        exit 1
-    fi
-
-    echo "Hydra client for Outline created. Client ID: ${HYDRA_CLIENT_ID}"
-}
 
 # 部署基础组件
 function deployBase() {
@@ -107,25 +72,24 @@ function deployBase() {
     echo "create base component."
     dockerComposeUp postgresql
     dockerComposeUp redis
-    dockerComposeUp kratos
-    echo "Running Kratos database migrations..."
-    docker run --rm --network br0 \
-        oryd/kratos:v1.1.0 migrate sql \
-        "postgres://${KRATOS_DB_USER}:${KRATOS_DB_PASSWORD}@${POSTGRES_IP}:5432/${KRATOS_DB_NAME}?sslmode=disable" \
-        --yes
-
-    dockerComposeUp hydra
-    echo "Running Hydra database migrations..."
-    docker run --rm --network br0 \
-        oryd/hydra:v2.2.0 migrate sql \
-        "postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASSWORD}@${POSTGRES_IP}:5432/${HYDRA_DB_NAME}?sslmode=disable" \
-        --yes
 
     # 等他们启动
     sleep 20
 
-    # 创建 Hydra 客户端
-    createHydraClientForOutline
+    # 创建 gitea的服务，依赖 PostgreSQL
+    echo "create gitea service."
+    dockerComposeUp gitea
+
+    sleep 10
+    # 创建 gitea的 管理员账号
+    echo "create gitea admin user: ${GITEA_ADMIN_USER}."
+    createGiteaAdmin "${GITEA_ADMIN_USER}" "${GITEA_ADMIN_PASSWORD}" "${GITEA_ADMIN_EMAIL}"
+
+    sleep 5
+
+    # 创建 gitea的 应用，给 outline做oidc认证服务
+    echo "create gitea app: ${GITEA_APP_NAME}."
+    createGiteaApp "${GITEA_ADMIN_USER}" "${GITEA_ADMIN_PASSWORD}" "${GITEA_APP_NAME}" "${OUTLINE_ROOT_URL}/auth/oidc.callback"
 
     # minio 开关
     if [ "$MINIO_ENABLED" = "true" ]; then
@@ -157,12 +121,8 @@ function printConf() {
     echo "###############################################################################################"
     echo "###############################################################################################"
     echo "###############################################################################################"
-    echo "Kratos Admin UI: https://${KRATOS_DOMAIN_NAME}/admin"
-    echo "Kratos Public UI: https://${KRATOS_DOMAIN_NAME}/"
-    echo "Hydra Admin UI: https://${HYDRA_DOMAIN_NAME}/admin"
-    echo "Hydra Public UI: https://${HYDRA_DOMAIN_NAME}/"
-    echo ""
     echo "Outline URL: https://${OUTLINE_DOMAIN_NAME}"
+    echo "gitea              https://${GITEA_DOMAIN_NAME} -> http://${GITEA_IP}:${GITEA_PORT}, user ${GITEA_ADMIN_USER}, password ${GITEA_ADMIN_PASSWORD}"
     echo "###############################################################################################"
     echo "###############################################################################################"
     echo "###############################################################################################"

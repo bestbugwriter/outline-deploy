@@ -37,6 +37,27 @@ export OUTLINE_DB_PASSWORD=$(randomString16)
 export OUTLINE_DB_NAME=outline
 
 
+################
+## gitea相关的配置，主要用于做一个 oidc的认证服务
+export GITEA_IP=172.16.0.50
+export GITEA_PORT=3000
+export GITEA_DATA_DIR=./data
+
+# gitea的 db配置，默认用的 mysql
+export GITEA_DB_TYPE=postgres
+export GITEA_DB_HOST=${POSTGRES_IP}:5432
+export GITEA_DB_NAME=${POSTGRES_DB}
+export GITEA_DB_USER=${POSTGRES_USER}
+export GITEA_DB_PASSWD=${POSTGRES_PASSWORD}
+export GITEA_DOMAIN_NAME=git.${ROOT_DOMAIN_NAME}
+
+# gitea中 创建的 app名称
+export GITEA_APP_NAME=outline
+
+# 注册时不能用 admin作为管理员账号，这是保留值
+export GITEA_ADMIN_USER=root
+export GITEA_ADMIN_PASSWORD=$(randomString16)
+export GITEA_ADMIN_EMAIL=${ADMIN_EMAIL}
 
 
 ################
@@ -130,34 +151,3 @@ export GRIST_DEFAULT_EMAIL=${ADMIN_EMAIL}
 
 
 
-################
-## Ory Kratos (Identity Management)
-export KRATOS_IP=172.16.0.51
-export KRATOS_DOMAIN_NAME=login.${ROOT_DOMAIN_NAME}
-
-# Kratos database credentials
-export KRATOS_DB_USER=kratos
-export KRATOS_DB_PASSWORD=$(randomString16)
-export KRATOS_DB_NAME=kratos
-
-# Kratos secrets
-export KRATOS_SECRET_COOKIE=$(randomString 32)
-export KRATOS_SECRET_CIPHER=$(randomString 32)
-
-
-################
-## Ory Hydra (OAuth2 & OpenID Connect Provider)
-export HYDRA_IP=172.16.0.52
-export HYDRA_DOMAIN_NAME=auth.${ROOT_DOMAIN_NAME}
-
-# Hydra database credentials
-export HYDRA_DB_USER=hydra
-export HYDRA_DB_PASSWORD=$(randomString16)
-export HYDRA_DB_NAME=hydra
-
-# Hydra system secret
-export HYDRA_SYSTEM_SECRET=$(randomString 32)
-
-# Hydra client for Outline
-export HYDRA_CLIENT_ID=outline-client
-export HYDRA_CLIENT_SECRET=$(randomString 32)
