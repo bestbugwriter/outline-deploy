@@ -72,14 +72,14 @@ function deployBase() {
     echo "Running Kratos database migrations..."
     docker run --rm --network br0 \
         oryd/kratos:v1.1.0 migrate sql \
-        --dsn "postgres://${KRATOS_DB_USER}:${KRATOS_DB_PASSWORD}@${POSTGRES_IP}:5432/${KRATOS_DB_NAME}?sslmode=disable" \
+        "postgres://${KRATOS_DB_USER}:${KRATOS_DB_PASSWORD}@${POSTGRES_IP}:5432/${KRATOS_DB_NAME}?sslmode=disable" \
         --yes
 
     dockerComposeUp hydra
     echo "Running Hydra database migrations..."
     docker run --rm --network br0 \
         oryd/hydra:v2.2.0 migrate sql \
-        --dsn "postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASSWORD}@${POSTGRES_IP}:5432/${HYDRA_DB_NAME}?sslmode=disable" \
+        "postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASSWORD}@${POSTGRES_IP}:5432/${HYDRA_DB_NAME}?sslmode=disable" \
         --yes
 
     # 等他们启动
