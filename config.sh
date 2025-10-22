@@ -49,7 +49,7 @@ export GITEA_DB_HOST=${POSTGRES_IP}:5432
 export GITEA_DB_NAME=gitea
 export GITEA_DB_USER=gitea
 export GITEA_DB_PASSWD=$(randomString16)
-export GITEA_DOMAIN_NAME=gite.${ROOT_DOMAIN_NAME}
+export GITEA_DOMAIN_NAME=gitea.${ROOT_DOMAIN_NAME}
 
 # gitea中 创建的 app名称
 export GITEA_APP_NAME=outline
@@ -117,7 +117,7 @@ export OUTLINE_ENV_FILE=outline.env
 export OUTLINE_SECRET_KEY=$(openssl rand -hex 32)
 export OUTLINE_UTILS_SECRET=$(openssl rand -hex 32)
 # outline的域名
-export OUTLINE_DOMAIN_NAME=wiki.${ROOT_DOMAIN_NAME}
+export OUTLINE_DOMAIN_NAME=outline.${ROOT_DOMAIN_NAME}
 
 # outline 的 url， 我们用https的
 export OUTLINE_ROOT_URL=https://${OUTLINE_DOMAIN_NAME}
