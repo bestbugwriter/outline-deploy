@@ -13,6 +13,8 @@ services:
     environment:
       DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT}, ${GITEA_DOMAIN_NAME} -> http://${GITEA_IP}:${GITEA_PORT}'
       STAGE: 'production' # Or 'staging' for testing
+      WEBSOCKET: 'true'
+      CLIENT_MAX_BODY_SIZE: 4g
       # FORCE_RENEW: 'true' # Uncomment to force renew certificates
     volumes:
       - ${HTTPS_PORTAL_DATA_DIR}:/var/lib/https-portal
