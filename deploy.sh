@@ -1,16 +1,7 @@
 #!/usr/bin/env bash
 
-# 如果存在 deploy.conf 文件，则加载它以重用之前的配置（特别是密码）
-if [ -f "deploy.conf" ]; then
-    echo "Found deploy.conf, loading existing configuration..."
-    # 我们需要导出变量，以便后续的脚本可以使用
-    set -a
-    source deploy.conf
-    set +a
-fi
-
 # 部署脚本
-# source config.sh
+# config.sh 会自动加载 deploy.conf（如果存在）
 . config.sh
 
 # source docker.sh
@@ -116,6 +107,14 @@ function deployBase() {
     else
         echo "grist disabled, do not create grist container."
     fi
+
+    # rss服务开关
+    if [ "$RSS_ENABLED" = "true" ]; then
+        echo "rss enabled, create rss services (rsshub, browserless, freshrss)."
+        dockerComposeUp rss
+    else
+        echo "rss disabled, do not create rss services."
+    fi
 }
 
 # 打印关键信息
@@ -125,6 +124,13 @@ function printConf() {
     echo "###############################################################################################"
     echo "Outline: https://${OUTLINE_DOMAIN_NAME}"
     echo "Gitea: https://${GITEA_DOMAIN_NAME} -> http://${GITEA_IP}:${GITEA_PORT}, user ${GITEA_ADMIN_USER}, password ${GITEA_ADMIN_PASSWORD}"
+    
+    if [ "$RSS_ENABLED" = "true" ]; then
+        echo "---"
+        echo "RSSHub: http://${RSSHUB_IP}:${RSSHUB_PORT}, access_key ${RSSHUB_ACCESS_KEY}"
+        echo "FreshRSS: http://${FRESHRSS_IP}, user ${FRESHRSS_ADMIN_USER}, password ${FRESHRSS_ADMIN_PASSWORD}"
+    fi
+    
     echo "###############################################################################################"
     echo "###############################################################################################"
     echo "###############################################################################################"
@@ -260,6 +266,7 @@ GRIST_DOMAIN_NAME=${GRIST_DOMAIN_NAME}
 GRIST_DEFAULT_EMAIL=${GRIST_DEFAULT_EMAIL}
 
 # RSS services configuration
+RSS_ENABLED=${RSS_ENABLED}
 RSSHUB_IP=${RSSHUB_IP}
 RSSHUB_PORT=${RSSHUB_PORT}
 RSSHUB_ACCESS_KEY=${RSSHUB_ACCESS_KEY}

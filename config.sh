@@ -170,13 +170,19 @@ export GRIST_DEFAULT_EMAIL=${ADMIN_EMAIL}
 
 ################
 ## RSS 服务配置
+export RSS_ENABLED=false
 # RSSHub 配置
 export RSSHUB_IP=172.16.0.90
 export RSSHUB_PORT=1200
 setIfEmpty RSSHUB_ACCESS_KEY "$(randomString16)"
-# Telegram 配置（值稍后填充）
-setIfEmpty TELEGRAM_SESSION ""
-setIfEmpty TELEGRAM_TOKEN ""
+# Telegram 配置（值稍后填充，如不使用可保持为空）
+# 只在未设置时初始化为空字符串
+if [ -z "${TELEGRAM_SESSION+x}" ]; then
+    export TELEGRAM_SESSION=""
+fi
+if [ -z "${TELEGRAM_TOKEN+x}" ]; then
+    export TELEGRAM_TOKEN=""
+fi
 # Redis URL for RSSHub
 export RSSHUB_REDIS_URL=redis://:${REDIS_PASSWORD}@${REDIS_IP}:6379
 
