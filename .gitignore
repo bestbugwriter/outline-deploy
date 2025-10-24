@@ -1,2 +1,12 @@
 /.venv/
 /.idea/
+
+# Deployment configuration (contains passwords)
+deploy.conf
+
+# Data directories
+*/data/
+*/logs/
+*/persist/
+rss/fr-data/
+rss/fr-extensions/

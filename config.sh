@@ -150,4 +150,36 @@ export GRIST_DOMAIN_NAME=drist.${ROOT_DOMAIN_NAME}
 export GRIST_DEFAULT_EMAIL=${ADMIN_EMAIL}
 
 
+################
+## RSS 服务配置
+# RSSHub 配置
+export RSSHUB_IP=172.16.0.90
+export RSSHUB_PORT=1200
+export RSSHUB_ACCESS_KEY=$(randomString16)
+# Telegram 配置（值稍后填充）
+export TELEGRAM_SESSION=
+export TELEGRAM_TOKEN=
+# Redis URL for RSSHub
+export RSSHUB_REDIS_URL=redis://:${REDIS_PASSWORD}@${REDIS_IP}:6379
+
+# Browserless 配置
+export BROWSERLESS_IP=172.16.0.91
+export BROWSERLESS_PORT=3000
+
+# FreshRSS 配置
+export FRESHRSS_IP=172.16.0.92
+export FRESHRSS_PORT=80
+export FRESHRSS_DATA_DIR=./fr-data
+export FRESHRSS_EXTENSIONS_DIR=./fr-extensions
+# FreshRSS 管理员配置
+export FRESHRSS_ADMIN_USER=admin
+export FRESHRSS_ADMIN_PASSWORD=$(randomString16)
+# FreshRSS 数据库配置
+export FRESHRSS_DB_TYPE=pgsql
+export FRESHRSS_DB_HOST=${POSTGRES_IP}
+export FRESHRSS_DB_PORT=5432
+export FRESHRSS_DB_NAME=freshrss_db
+export FRESHRSS_DB_USER=freshrss_user
+export FRESHRSS_DB_PASSWORD=$(randomString16)
+
 
