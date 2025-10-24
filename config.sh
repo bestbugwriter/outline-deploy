@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
 # 配置文件，使用时， source 本文件
+
+# 如果存在 deploy.conf，先加载已有配置，避免重复生成随机密码
+if [ -f "deploy.conf" ]; then
+    echo "Found deploy.conf, loading existing configuration to preserve passwords..."
+    set -a
+    source deploy.conf
+    set +a
+fi
+
 # 随机字符串
 function randomString() {
     STRING_LEN=$1
@@ -10,6 +19,15 @@ function randomString() {
 # 随机16位字符串
 function randomString16() {
     randomString 16
+}
+
+# 只有当变量不存在或为空时才生成新值
+function setIfEmpty() {
+    local var_name=$1
+    local var_value=$2
+    if [ -z "${!var_name}" ]; then
+        export "$var_name=$var_value"
+    fi
 }
 
 # docker的子网网段，我们创建的几个容器都在一个网段
@@ -29,11 +47,11 @@ export POSTGRES_IP=172.16.0.11
 export POSTGRES_DATA_DIR=./data
 # postgres 超级管理员账号
 export POSTGRES_USER=postgres
-export POSTGRES_PASSWORD=$(randomString16)
+setIfEmpty POSTGRES_PASSWORD "$(randomString16)"
 
 # outline 数据库账号
 export OUTLINE_DB_USER=outline
-export OUTLINE_DB_PASSWORD=$(randomString16)
+setIfEmpty OUTLINE_DB_PASSWORD "$(randomString16)"
 export OUTLINE_DB_NAME=outline
 
 
@@ -48,7 +66,7 @@ export GITEA_DB_TYPE=postgres
 export GITEA_DB_HOST=${POSTGRES_IP}:5432
 export GITEA_DB_NAME=gitea
 export GITEA_DB_USER=gitea
-export GITEA_DB_PASSWD=$(randomString16)
+setIfEmpty GITEA_DB_PASSWD "$(randomString16)"
 export GITEA_DOMAIN_NAME=gitea.${ROOT_DOMAIN_NAME}
 
 # gitea中 创建的 app名称
@@ -56,7 +74,7 @@ export GITEA_APP_NAME=outline
 
 # 注册时不能用 admin作为管理员账号，这是保留值
 export GITEA_ADMIN_USER=root
-export GITEA_ADMIN_PASSWORD=$(randomString16)
+setIfEmpty GITEA_ADMIN_PASSWORD "$(randomString16)"
 export GITEA_ADMIN_EMAIL=${ADMIN_EMAIL}
 
 
@@ -64,7 +82,7 @@ export GITEA_ADMIN_EMAIL=${ADMIN_EMAIL}
 ## redis 相关配置
 export REDIS_IP=172.16.0.20
 # 密码随机
-export REDIS_PASSWORD=$(randomString16)
+setIfEmpty REDIS_PASSWORD "$(randomString16)"
 export REDIS_DATA_DIR=./data
 export REDIS_LOG_DIR=./logs
 
@@ -76,7 +94,7 @@ export MINIO_IP=172.16.0.30
 export MINIO_PORT=9001
 export MINIO_S3_PORT=9000
 export MINIO_ROOT_USER=admin
-export MINIO_ROOT_PASSWORD=$(randomString16)
+setIfEmpty MINIO_ROOT_PASSWORD "$(randomString16)"
 export MINIO_DATA_DIR=./data
 
 # minio的 控制台域名，这个可以登录、管理
@@ -87,9 +105,9 @@ export MINIO_S3API_DOMAIN_NAME=minio-s3.${ROOT_DOMAIN_NAME}
 
 # minio 创建的 accessKey 和 secretKey， 使用随机字符串，注意长度要求
 # mc: <ERROR> Unable to add a new service account. The access key is invalid. (access key length should be between 3 and 20).
-export MINIO_ADMIN_AK=$(randomString 16)
+setIfEmpty MINIO_ADMIN_AK "$(randomString 16)"
 # mc: <ERROR> Unable to add a new service account. The secret key is invalid. (secret key length should be between 8 and 40).
-export MINIO_ADMIN_SK=$(randomString 32)
+setIfEmpty MINIO_ADMIN_SK "$(randomString 32)"
 
 # minio 自动创建的 bucket，用于 outline存储
 export OUTLINE_MINIO_BUCKET=outline
@@ -114,8 +132,8 @@ export OUTLINE_ENV_FILE_TEMPLATE=outline.env.template
 export OUTLINE_ENV_FILE=outline.env
 
 # outline 用的 key和 密钥  SECRET_KEY，UTILS_SECRET
-export OUTLINE_SECRET_KEY=$(openssl rand -hex 32)
-export OUTLINE_UTILS_SECRET=$(openssl rand -hex 32)
+setIfEmpty OUTLINE_SECRET_KEY "$(openssl rand -hex 32)"
+setIfEmpty OUTLINE_UTILS_SECRET "$(openssl rand -hex 32)"
 # outline的域名
 export OUTLINE_DOMAIN_NAME=outline.${ROOT_DOMAIN_NAME}
 
@@ -155,10 +173,10 @@ export GRIST_DEFAULT_EMAIL=${ADMIN_EMAIL}
 # RSSHub 配置
 export RSSHUB_IP=172.16.0.90
 export RSSHUB_PORT=1200
-export RSSHUB_ACCESS_KEY=$(randomString16)
+setIfEmpty RSSHUB_ACCESS_KEY "$(randomString16)"
 # Telegram 配置（值稍后填充）
-export TELEGRAM_SESSION=
-export TELEGRAM_TOKEN=
+setIfEmpty TELEGRAM_SESSION ""
+setIfEmpty TELEGRAM_TOKEN ""
 # Redis URL for RSSHub
 export RSSHUB_REDIS_URL=redis://:${REDIS_PASSWORD}@${REDIS_IP}:6379
 
@@ -173,13 +191,13 @@ export FRESHRSS_DATA_DIR=./fr-data
 export FRESHRSS_EXTENSIONS_DIR=./fr-extensions
 # FreshRSS 管理员配置
 export FRESHRSS_ADMIN_USER=admin
-export FRESHRSS_ADMIN_PASSWORD=$(randomString16)
+setIfEmpty FRESHRSS_ADMIN_PASSWORD "$(randomString16)"
 # FreshRSS 数据库配置
 export FRESHRSS_DB_TYPE=pgsql
 export FRESHRSS_DB_HOST=${POSTGRES_IP}
 export FRESHRSS_DB_PORT=5432
 export FRESHRSS_DB_NAME=freshrss_db
 export FRESHRSS_DB_USER=freshrss_user
-export FRESHRSS_DB_PASSWORD=$(randomString16)
+setIfEmpty FRESHRSS_DB_PASSWORD "$(randomString16)"
 
 
