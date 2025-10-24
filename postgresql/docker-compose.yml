@@ -16,6 +16,9 @@ services:
       - GITEA_DB_USER=${GITEA_DB_USER}
       - GITEA_DB_PASSWD=${GITEA_DB_PASSWD}
       - GITEA_DB_NAME=${GITEA_DB_NAME}
+      - FRESHRSS_DB_USER=${FRESHRSS_DB_USER}
+      - FRESHRSS_DB_PASSWORD=${FRESHRSS_DB_PASSWORD}
+      - FRESHRSS_DB_NAME=${FRESHRSS_DB_NAME}
     volumes:
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
       - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data

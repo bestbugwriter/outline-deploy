@@ -1,0 +1,68 @@
+networks:
+  br0:
+    external: true
+
+services:
+  rsshub:
+    image: diygod/rsshub
+    container_name: rsshub
+    restart: always
+    environment:
+      NODE_ENV: production
+      CACHE_TYPE: redis
+      REDIS_URL: ${RSSHUB_REDIS_URL}
+      PUPPETEER_WS_ENDPOINT: "ws://${BROWSERLESS_IP}:${BROWSERLESS_PORT}"
+      ACCESS_KEY: ${RSSHUB_ACCESS_KEY}
+      TELEGRAM_SESSION: ${TELEGRAM_SESSION}
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${RSSHUB_PORT}/healthz?key=${RSSHUB_ACCESS_KEY}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - browserless
+    networks:
+      br0:
+        ipv4_address: ${RSSHUB_IP}
+
+  browserless:
+    image: browserless/chrome
+    container_name: browserless
+    restart: always
+    ulimits:
+      core:
+        hard: 0
+        soft: 0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${BROWSERLESS_PORT}/pressure"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      br0:
+        ipv4_address: ${BROWSERLESS_IP}
+
+  freshrss:
+    image: freshrss/freshrss
+    container_name: freshrss
+    restart: always
+    environment:
+      # FreshRSS 管理员配置
+      FRESHRSS_ADMIN_USER: ${FRESHRSS_ADMIN_USER}
+      FRESHRSS_ADMIN_PASSWORD: ${FRESHRSS_ADMIN_PASSWORD}
+      # 数据库配置
+      FRESHRSS_DATABASE_TYPE: ${FRESHRSS_DB_TYPE}
+      FRESHRSS_DATABASE_HOST: ${FRESHRSS_DB_HOST}
+      FRESHRSS_DATABASE_PORT: ${FRESHRSS_DB_PORT}
+      FRESHRSS_DATABASE_NAME: ${FRESHRSS_DB_NAME}
+      FRESHRSS_DATABASE_USER: ${FRESHRSS_DB_USER}
+      FRESHRSS_DATABASE_PASSWORD: ${FRESHRSS_DB_PASSWORD}
+    volumes:
+      # './data' 是指在当前文件夹下创建一个 'data' 目录来永久保存你的所有文章
+      - ${FRESHRSS_DATA_DIR}:/var/www/FreshRSS/data
+      # './extensions' 目录用于存放扩展插件
+      - ${FRESHRSS_EXTENSIONS_DIR}:/var/www/FreshRSS/extensions
+    networks:
+      br0:
+        ipv4_address: ${FRESHRSS_IP}
