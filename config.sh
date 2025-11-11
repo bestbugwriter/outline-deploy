@@ -22,30 +22,42 @@ export ROOT_DOMAIN_NAME=bdms.fun
 export ADMIN_EMAIL=yywfqq@live.com
 
 
-################
-# mysql 配置
-export MYSQL_IP=172.16.0.10
-# mysql root密码
-export MYSQL_ROOT_PASSWORD=$(randomString16)
-export MYSQL_DATA_DIR=./data
-
-# 使用到的两个 db，一个给 gitea用，一个给 nginx proxy manager用
-export MYSQL_GITEA_DB=gitea
-export MYSQL_NPM_DB=npm
-
-# 默认的 MySQL账号， 密码随机
-export MYSQL_USER=base
-export MYSQL_PASSWORD=$(randomString16)
-
 
 ################
 # postgresql 配置
 export POSTGRES_IP=172.16.0.11
-export POSTGRES_DB=outline
 export POSTGRES_DATA_DIR=./data
-# 密码随机
-export POSTGRES_USER=outline
+# postgres 超级管理员账号
+export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=$(randomString16)
+
+# outline 数据库账号
+export OUTLINE_DB_USER=outline
+export OUTLINE_DB_PASSWORD=$(randomString16)
+export OUTLINE_DB_NAME=outline
+
+
+################
+## gitea相关的配置，主要用于做一个 oidc的认证服务
+export GITEA_IP=172.16.0.50
+export GITEA_PORT=3000
+export GITEA_DATA_DIR=./data
+
+# gitea的 db配置，默认用的 mysql
+export GITEA_DB_TYPE=postgres
+export GITEA_DB_HOST=${POSTGRES_IP}:5432
+export GITEA_DB_NAME=gitea
+export GITEA_DB_USER=gitea
+export GITEA_DB_PASSWD=$(randomString16)
+export GITEA_DOMAIN_NAME=git.${ROOT_DOMAIN_NAME}
+
+# gitea中 创建的 app名称
+export GITEA_APP_NAME=outline
+
+# 注册时不能用 admin作为管理员账号，这是保留值
+export GITEA_ADMIN_USER=root
+export GITEA_ADMIN_PASSWORD=$(randomString16)
+export GITEA_ADMIN_EMAIL=${ADMIN_EMAIL}
 
 
 ################
@@ -84,48 +96,10 @@ export OUTLINE_MINIO_BUCKET=outline
 
 
 ################
-## nginx proxy manager 相关的配置
-export NPM_IP=172.16.0.40
-export NPM_DATA_DIR=./data
-export NPM_LETSENCRYPT_DIR=./letsencrypt
+## https-portal a fully automated SSL/TLS reverse proxy
+export HTTPS_PORTAL_IP=172.16.0.40
+export HTTPS_PORTAL_DATA_DIR=./data
 
-# nginx proxy manager 使用 mysql 作为存储
-export NPM_DB_HOST=${MYSQL_IP}
-export NPM_DB_PORT=3306
-export NPM_DB_USER=${MYSQL_USER}
-export NPM_DB_PASSWORD=${MYSQL_PASSWORD}
-export NPM_DB_NAME=${MYSQL_NPM_DB}
-
-# nginx proxy manager 默认的 用户名密码， 需要在首次登录后修改
-export NPM_ADMIN_USER_DEFAULT=admin@example.com
-export NPM_ADMIN_PASSWORD_DEFAULT=changeme
-
-# nginx proxy manager 首次登录后，用户名改成自己的邮箱，密码随机 16位字符
-export NPM_ADMIN_USER=${ADMIN_EMAIL}
-export NPM_ADMIN_PASSWORD=$(randomString16)
-
-
-################
-## gitea相关的配置，主要用于做一个 oidc的认证服务
-export GITEA_IP=172.16.0.50
-export GITEA_PORT=3000
-export GITEA_DATA_DIR=./data
-
-# gitea的 db配置，默认用的 mysql
-export GITEA_DB_TYPE=mysql
-export GITEA_DB_HOST=${MYSQL_IP}:3306
-export GITEA_DB_NAME=${MYSQL_GITEA_DB}
-export GITEA_DB_USER=${MYSQL_USER}
-export GITEA_DB_PASSWD=${MYSQL_PASSWORD}
-export GITEA_DOMAIN_NAME=git.${ROOT_DOMAIN_NAME}
-
-# gitea中 创建的 app名称
-export GITEA_APP_NAME=outline
-
-# 注册时不能用 admin作为管理员账号，这是保留值
-export GITEA_ADMIN_USER=root
-export GITEA_ADMIN_PASSWORD=$(randomString16)
-export GITEA_ADMIN_EMAIL=${ADMIN_EMAIL}
 
 
 ################
@@ -174,3 +148,6 @@ export GRIST_PORT=8484
 export GRIST_DATA_DIR=./persist
 export GRIST_DOMAIN_NAME=drist.${ROOT_DOMAIN_NAME}
 export GRIST_DEFAULT_EMAIL=${ADMIN_EMAIL}
+
+
+
