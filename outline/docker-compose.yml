@@ -5,7 +5,7 @@ networks:
 services:
   outline:
     container_name: outline
-    image: outlinewiki/outline:latest
+    image: outlinewiki/outline:1.9.2
     env_file: ${OUTLINE_ENV_FILE}
 
     volumes:

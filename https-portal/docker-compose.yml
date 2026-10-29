@@ -11,7 +11,7 @@ services:
       - '80:80'
       - '443:443'
     environment:
-      DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT}, ${GITEA_DOMAIN_NAME} -> http://${GITEA_IP}:${GITEA_PORT}'
+      DOMAINS: '${OUTLINE_DOMAIN_NAME} -> http://${OUTLINE_IP}:${OUTLINE_PORT}, ${GITEA_DOMAIN_NAME} -> http://${GITEA_IP}:${GITEA_PORT}, rb.bdms.fun -> http://172.16.0.101:1200, fr.bdms.fun -> http://172.16.0.103:80'
       STAGE: 'production' # Or 'staging' for testing
       WEBSOCKET: 'true'
       CLIENT_MAX_BODY_SIZE: 4g
